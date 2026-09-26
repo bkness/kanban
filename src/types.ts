@@ -35,10 +35,13 @@ export type KanbanState = {
     moveColumn:    (activeId: string, overId: string) => void;
    
     // card actions
-    addCard:       (columnId: string, title: string) => void;
+    addCard:       (columnId: string, title: string) => string;
     deleteCard:    (cardId: string) => void;
     updateCard:    (cardId: string, updates: Partial<Pick<Card, "title" | "description" | "labelIds" | "dueDate">>) => void;
     moveCard:      (cardId: string, toColumnId: string, toIndex: number) => void;
+
+    // board actions
+    resetBoard:    () => void;
 
     // label actions
     addLabel:      (label: Omit<Label, "id">) => void;

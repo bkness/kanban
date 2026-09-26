@@ -56,6 +56,7 @@ export const useKanbanStore = create<KanbanState>()(
                     cards: { ...state.cards, [id]: { id, title, description: '', columnId, labelIds: [], dueDate: null, createdAt: now, updatedAt: now } },
                     cardOrder: { ...state.cardOrder, [columnId]: [...state.cardOrder[columnId], id] },
                 }));
+                return id;
             },
             deleteCard: (cardId) => {
                 set((state) => {
@@ -108,6 +109,9 @@ export const useKanbanStore = create<KanbanState>()(
                     return { labels, cards };
                 });
             },
+
+            // board actions
+            resetBoard: () => set(starterBoard()),
         }),
         {
             name: 'kanban-storage',
