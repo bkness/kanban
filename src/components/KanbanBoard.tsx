@@ -7,6 +7,7 @@ import CardEditor from './CardEditor';
 import { dueStatus } from '../utils/due';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import Column from './Column';
+import FilterBar from './FilterBar';
 
 
 
@@ -74,6 +75,7 @@ export default function KanbanBoard() {
                         <div className="board-stat">✓ <strong>{stats.done}</strong> done</div>
                     </div>
                 </div>
+                <FilterBar />
             </div>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>

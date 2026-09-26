@@ -113,3 +113,45 @@ test("reset board restores the starter board", async ({ page }) => {
     await page.getByRole("button", { name: /Reset board/ }).click();
     await expect(page.locator(".card")).toHaveCount(9);
 });
+
+const filterChip = (page: Page, text: string) => page.locator(".filter-bar .label-toggle", { hasText: text });
+
+test("search narrows cards across columns and shows per-column counts", async ({ page }) => {
+    await page.getByRole("searchbox", { name: "Search cards" }).fill("demo");
+    // title "One-click demo accounts" + description "…its live demo."
+    await expect(page.locator(".card")).toHaveCount(2);
+    await expect(page.locator(".filter-status")).toContainText("2 matches");
+    await expect(column(page, "Up next").locator(".col-count")).toHaveText("0/3");
+    await expect(column(page, "Up next").locator(".col-empty")).toHaveText("No matching cards");
+    await expect(column(page, "Shipped").locator(".col-count")).toHaveText("1/4");
+});
+
+test("label chips filter by any selected label, and combine with search", async ({ page }) => {
+    await filterChip(page, "Security").click();
+    await expect(filterChip(page, "Security")).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(".card")).toHaveCount(2);
+
+    await filterChip(page, "Docs").click();
+    await expect(page.locator(".card")).toHaveCount(3);
+
+    // "forged init" is a Web card, so only the Security one survives
+    await page.getByRole("searchbox", { name: "Search cards" }).fill("forged");
+    await expect(page.locator(".card")).toHaveCount(1);
+    await expect(page.locator(".card")).toContainText("forged 0.4");
+});
+
+test("clear and Escape reset the filter", async ({ page }) => {
+    const search = page.getByRole("searchbox", { name: "Search cards" });
+    await search.fill("demo");
+    await filterChip(page, "Backend").click();
+    await page.locator(".filter-clear").click();
+    await expect(search).toHaveValue("");
+    await expect(filterChip(page, "Backend")).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator(".card")).toHaveCount(9);
+
+    await search.fill("zzz-nothing");
+    await expect(page.locator(".card")).toHaveCount(0);
+    await search.press("Escape");
+    await expect(search).toHaveValue("");
+    await expect(page.locator(".card")).toHaveCount(9);
+});

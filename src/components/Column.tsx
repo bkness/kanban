@@ -4,6 +4,7 @@ import { useUiStore } from "../store/uiStore";
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useShallow } from "zustand/shallow";
 import KanbanCard from "./KanbanCard";
+import { isFiltering, matchesFilter } from "../utils/filter";
 
 const ACCENTS = ["amber", "blue", "violet"];
 
@@ -16,6 +17,11 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
     const renameColumn = useKanbanStore((state) => state.renameColumn);
     const deleteColumn = useKanbanStore((state) => state.deleteColumn);
     const openCard = useUiStore((state) => state.openCard);
+    const query = useUiStore((state) => state.query);
+    const labelFilter = useUiStore((state) => state.labelFilter);
+    const filtering = isFiltering(query, labelFilter);
+    // Hidden cards keep their place in cardOrder; drops still index into the full order
+    const visibleCards = filtering ? cards.filter((card) => matchesFilter(card, query, labelFilter)) : cards;
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: columnId, data: { type: "column", columnId } });
     const style = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
@@ -79,7 +85,7 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
                         {column.title}
                     </button>
                 )}
-                <div className="col-count">{cards.length}</div>
+                <div className="col-count">{filtering ? `${visibleCards.length}/${cards.length}` : cards.length}</div>
                 <div className="col-menu-wrap" ref={menuRef}>
                     <button
                         className="col-menu"
@@ -98,11 +104,12 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
                 </div>
             </div>
             <div className="col-body">
-                <SortableContext items={cards.map(c => c.id)} strategy={verticalListSortingStrategy}>
-                    {cards.map((card) => (
+                <SortableContext items={visibleCards.map(c => c.id)} strategy={verticalListSortingStrategy}>
+                    {visibleCards.map((card) => (
                         <KanbanCard key={card.id} cardId={card.id} columnId={columnId} isDoneColumn={isDoneColumn} />
                     ))}
                 </SortableContext>
+                {filtering && visibleCards.length === 0 && <div className="col-empty">No matching cards</div>}
             </div>
             <div className="col-footer">
                 <button className="add-card-btn" onClick={() => openCard(addCard(columnId, "New card"))}>
