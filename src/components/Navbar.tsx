@@ -1,5 +1,6 @@
 import { useKanbanStore } from "../store/kanbanStore";
 import { useUiStore } from "../store/uiStore";
+import AccountMenu from "./AccountMenu";
 
 
 export default function Navbar() {
@@ -49,6 +50,7 @@ export default function Navbar() {
                 >
                     + New card
                 </button>
+                <AccountMenu />
             </div>
         </nav>
     );
