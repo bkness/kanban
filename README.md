@@ -2,7 +2,7 @@
 
 A drag-and-drop Kanban board with card editing, labels, and due dates. Boards save in your browser, so there's nothing to sign up for.
 
-**Live demo:** [kanban-kappa-cyan.vercel.app](https://kanban-kappa-cyan.vercel.app) — it opens with a starter board. Drag cards between columns, click one to edit it, and use **Reset board** to start over.
+**Live demo:** [kanban-bkness.vercel.app](https://kanban-bkness.vercel.app) — it opens with a starter board. Drag cards between columns, click one to edit it, and use **Reset board** to start over.
 
 ---
 
