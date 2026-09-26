@@ -1,0 +1,115 @@
+import { expect, test, type Page } from "@playwright/test";
+
+// Every test starts from the starter board (boards persist in localStorage)
+test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await expect(page.locator(".card").first()).toBeVisible();
+});
+
+const column = (page: Page, title: string) => page.locator(".col", { has: page.locator(".col-title", { hasText: title }) });
+const editor = (page: Page) => page.locator("dialog.editor[open]");
+
+test("starter board shows columns, cards, labels and stats", async ({ page }) => {
+    await expect(page.locator(".col-title")).toHaveText(["Up next", "In progress", "Shipped"]);
+    await expect(page.locator(".card")).toHaveCount(9);
+    await expect(page.locator(".board-stats")).toContainText("9 cards");
+    await expect(page.locator(".board-stats")).toContainText("4 done");
+    await expect(column(page, "Up next").locator(".label").first()).toBeVisible();
+});
+
+// Regression: App.tsx used to render <body>, which made React's event lookup
+// loop forever on the first text input's selectionchange and froze the tab
+test("text inputs don't freeze the page", async ({ page }) => {
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await expect(editor(page)).toBeVisible();
+    await page.locator(".editor-title").fill("still responsive");
+    expect(await page.evaluate(() => document.querySelector<HTMLInputElement>(".editor-title")?.value)).toBe("still responsive");
+});
+
+test("edit a card: title, description, label, due date — and it persists", async ({ page }) => {
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await page.locator(".editor-title").fill("Resume refresh v2");
+    await page.locator(".editor textarea").fill("Swap devlog for devlogger.");
+    await page.locator(".editor .label-toggle", { hasText: "Security" }).click();
+    await page.locator('.editor input[type="date"]').fill("2020-01-01");
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(editor(page)).toHaveCount(0);
+
+    const card = page.locator(".card", { hasText: "Resume refresh v2" });
+    await expect(card).toContainText("Swap devlog for devlogger.");
+    await expect(card.locator(".label", { hasText: "Security" })).toBeVisible();
+    await expect(card.locator(".card-due")).toHaveClass(/overdue/);
+    await expect(page.locator(".board-stats")).toContainText("1 overdue");
+
+    await page.reload();
+    await expect(page.locator(".card", { hasText: "Resume refresh v2" })).toBeVisible();
+});
+
+test("a blank title keeps the old one", async ({ page }) => {
+    await page.locator(".card", { hasText: "Kanban design pass" }).click();
+    await page.locator(".editor-title").fill("   ");
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(page.locator(".card", { hasText: "Kanban design pass" })).toBeVisible();
+});
+
+test("Esc closes the editor", async ({ page }) => {
+    await page.locator(".card", { hasText: "Kanban design pass" }).click();
+    await expect(editor(page)).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(editor(page)).toHaveCount(0);
+});
+
+test("add card opens its editor in that column", async ({ page }) => {
+    await column(page, "In progress").getByRole("button", { name: "＋ Add card" }).click();
+    await expect(editor(page)).toContainText("In progress");
+    await page.locator(".editor-title").fill("Write e2e tests");
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(column(page, "In progress").locator(".card", { hasText: "Write e2e tests" })).toBeVisible();
+});
+
+test("delete a card after confirming", async ({ page }) => {
+    page.once("dialog", (d) => d.accept());
+    await page.locator(".card", { hasText: "Kanban design pass" }).click();
+    await page.getByRole("button", { name: "Delete card" }).click();
+    await expect(page.locator(".card", { hasText: "Kanban design pass" })).toHaveCount(0);
+});
+
+test("rename a column by clicking its title", async ({ page }) => {
+    await page.locator(".col-title", { hasText: "Up next" }).click();
+    await page.locator(".col-title-input").fill("Backlog");
+    await page.keyboard.press("Enter");
+    await expect(page.locator(".col-title", { hasText: "Backlog" })).toBeVisible();
+});
+
+test("delete a column from its menu", async ({ page }) => {
+    page.once("dialog", (d) => d.accept());
+    await column(page, "Up next").getByRole("button", { name: /Column options/ }).click();
+    await page.getByRole("menuitem", { name: "Delete column" }).click();
+    await expect(page.locator(".col-title", { hasText: "Up next" })).toHaveCount(0);
+    await expect(page.locator(".card")).toHaveCount(6);
+});
+
+test("drag a card to another column", async ({ page }) => {
+    const card = page.locator(".card", { hasText: "Kanban design pass" });
+    const target = column(page, "Shipped").locator(".col-body");
+    const from = (await card.boundingBox())!;
+    const to = (await target.boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(from.x + from.width / 2 + 10, from.y + from.height / 2, { steps: 3 }); // past the 5px threshold
+    await page.mouse.move(to.x + to.width / 2, to.y + 40, { steps: 12 });
+    await page.mouse.up();
+    await expect(column(page, "Shipped").locator(".card", { hasText: "Kanban design pass" })).toBeVisible();
+    await expect(editor(page)).toHaveCount(0); // a drag must not open the editor
+});
+
+test("reset board restores the starter board", async ({ page }) => {
+    page.on("dialog", (d) => d.accept());
+    await page.locator(".card", { hasText: "Kanban design pass" }).click();
+    await page.getByRole("button", { name: "Delete card" }).click();
+    await expect(page.locator(".card")).toHaveCount(8);
+    await page.getByRole("button", { name: /Reset board/ }).click();
+    await expect(page.locator(".card")).toHaveCount(9);
+});

@@ -1,6 +1,14 @@
+import { useKanbanStore } from "../store/kanbanStore";
+import { useUiStore } from "../store/uiStore";
 
 
 export default function Navbar() {
+    // Boards save in the browser; reset restores the starter board
+    const resetBoard = useKanbanStore((state) => state.resetBoard);
+    const addCard = useKanbanStore((state) => state.addCard);
+    const firstColumnId = useKanbanStore((state) => state.columnOrder[0]);
+    const openCard = useUiStore((state) => state.openCard);
+
     return (
         <nav className="nav">
             <div className="nav-left">
@@ -16,14 +24,21 @@ export default function Navbar() {
                 </div>
             </div>
             <div className="nav-right">
-                <div className="avatar-group">
-                    <div className="avatar">AL</div>
-                    <div className="avatar">MK</div>
-                    <div className="avatar">JD</div>
-                </div>
-                <div className="nav-div" style={{ width: '1px', height: '16px', background: 'var(--border)' }}></div>
-                <button className="btn-ghost">⬡ Filters</button>
-                <button className="btn-primary">+ New Card</button>
+                <button
+                    className="btn-ghost"
+                    onClick={() => {
+                        if (window.confirm("Reset to the starter board? Your changes will be lost.")) resetBoard();
+                    }}
+                >
+                    ↺ Reset board
+                </button>
+                <button
+                    className="btn-primary"
+                    disabled={!firstColumnId}
+                    onClick={() => firstColumnId && openCard(addCard(firstColumnId, "New card"))}
+                >
+                    + New card
+                </button>
             </div>
         </nav>
     );
