@@ -748,3 +748,49 @@ button.col-title:focus-visible,
   .nav-brand, .nav-right button { white-space: nowrap; }
   .nav-right button { padding: 0 10px; font-size: 12px; }
 }
+
+/* ── Keyboard shortcuts ─────────────────────────────── */
+kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid var(--border-2);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font: 500 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  text-align: center;
+}
+.filter-search-wrap { position: relative; display: flex; }
+.filter-search-wrap .filter-search { padding-right: 34px; }
+.filter-kbd {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.filter-search:focus + .filter-kbd { display: none; }
+.btn-icon { width: 30px; padding: 0; justify-content: center; font-weight: 600; }
+
+.shortcuts { width: min(420px, calc(100vw - 32px)); }
+.shortcuts-body { padding: 20px 22px 8px; }
+.shortcuts-title { margin: 0 0 14px; font-size: 16px; font-weight: 600; color: var(--text); }
+.shortcuts-list { margin: 0; }
+.shortcuts-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.shortcuts-row:first-child { border-top: none; }
+.shortcuts-row dt { display: flex; gap: 4px; flex-shrink: 0; }
+.shortcuts-row dd { margin: 0; font-size: 13px; color: var(--text-muted); text-align: right; }
+
+@media (max-width: 720px) {
+  .filter-search-wrap { flex: 1 1 100%; }
+  .filter-kbd, .btn-icon { display: none; }   /* no hardware keyboard on phones, usually */
+}
