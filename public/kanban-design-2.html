@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kanban — Design B: Dark Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #0C0C10;
+    --surface:    #13131A;
+    --surface-2:  #1A1A24;
+    --surface-3:  #22222F;
+    --border:     #2A2A3A;
+    --border-2:   #38384C;
+    --text:       #EEEEF5;
+    --text-muted: #8888A8;
+    --text-dim:   #55556A;
+    --blue:       #4F8EFF;
+    --blue-glow:  rgba(79,142,255,0.15);
+    --blue-dim:   rgba(79,142,255,0.12);
+    --violet:     #A78BFA;
+    --violet-dim: rgba(167,139,250,0.12);
+    --emerald:    #34D399;
+    --emerald-dim:rgba(52,211,153,0.12);
+    --amber:      #FBBF24;
+    --amber-dim:  rgba(251,191,36,0.12);
+    --rose:       #FB7185;
+    --rose-dim:   rgba(251,113,133,0.12);
+    --col-w:      288px;
+    --radius:     12px;
+    --radius-sm:  7px;
+    --shadow:     0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-sm:  0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* subtle noise texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  .nav {
+    height: 54px;
+    background: rgba(19,19,26,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .nav-left { display: flex; align-items: center; gap: 16px; }
+
+  .nav-brand {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-brand-icon {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--blue), var(--violet));
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    box-shadow: 0 0 12px rgba(79,142,255,0.3);
+  }
+
+  .nav-divider { width: 1px; height: 16px; background: var(--border); }
+
+  .nav-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .nav-breadcrumb .active { color: var(--text); font-weight: 500; }
+  .nav-sep { color: var(--text-dim); }
+
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+
+  .avatar-group { display: flex; }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -6px;
+    color: var(--bg);
+    letter-spacing: 0;
+  }
+  .avatar:first-child { margin-left: 0; }
+
+  .btn-ghost {
+    height: 30px; padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: all 0.12s;
+  }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text); border-color: var(--border-2); }
+
+  .btn-primary {
+    height: 30px; padding: 0 14px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--blue);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 5px;
+    transition: opacity 0.12s;
+    box-shadow: 0 0 12px var(--blue-glow);
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    padding: 18px 22px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+
+  .board-info {}
+  .board-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 4px;
+  }
+  .board-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .board-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+  }
+  .board-stat {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .board-stat strong { color: var(--text-muted); font-weight: 500; }
+
+  .toolbar-actions { display: flex; align-items: center; gap: 6px; }
+
+  .view-toggle {
+    display: flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    gap: 2px;
+  }
+  .view-btn {
+    width: 26px; height: 24px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+  }
+  .view-btn.active { background: var(--surface-3); color: var(--text); }
+
+  /* ── BOARD ── */
+  .board {
+    display: flex;
+    gap: 12px;
+    padding: 18px 22px 48px;
+    overflow-x: auto;
+    align-items: flex-start;
+    min-height: calc(100vh - 150px);
+    position: relative;
+    z-index: 1;
+  }
+
+  .board::-webkit-scrollbar { height: 5px; }
+  .board::-webkit-scrollbar-track { background: transparent; }
+  .board::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+
+  /* ── COLUMN ── */
+  .col {
+    width: var(--col-w);
+    min-width: var(--col-w);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 180px);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .col-header {
+    padding: 14px 14px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* top accent line */
+  .col-accent {
+    position: absolute;
+    top: 0; left: 14px; right: 14px;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+  }
+  .col { position: relative; }
+
+  .col-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    letter-spacing: -0.1px;
+  }
+
+  .col-count {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 1px 8px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .col-menu {
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+    line-height: 1;
+  }
+  .col-menu:hover { background: var(--surface-3); color: var(--text); }
+
+  .col-body {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .col-body::-webkit-scrollbar { width: 3px; }
+  .col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  .col-footer {
+    padding: 8px 10px 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .add-card-btn {
+    width: 100%;
+    height: 30px;
+    background: transparent;
+    border: 1px dashed var(--border-2);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: all 0.12s;
+  }
+  .add-card-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--border-2);
+    color: var(--text-muted);
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent 60%);
+    pointer-events: none;
+  }
+
+  .card:hover {
+    border-color: var(--border-2);
+    background: var(--surface-3);
+    transform: translateY(-1px);
+  }
+
+  .card-labels { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+  }
+  .label-blue    { background: var(--blue-dim);    color: var(--blue); }
+  .label-violet  { background: var(--violet-dim);  color: var(--violet); }
+  .label-emerald { background: var(--emerald-dim); color: var(--emerald); }
+  .label-amber   { background: var(--amber-dim);   color: var(--amber); }
+  .label-rose    { background: var(--rose-dim);    color: var(--rose); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.45;
+    letter-spacing: -0.1px;
+  }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .card-due {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .card-due.overdue { color: var(--rose); }
+  .card-due.soon    { color: var(--amber); }
+  .card-due.done    { color: var(--emerald); }
+
+  .card-assignee {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg);
+  }
+
+  /* progress bar on card */
+  .card-progress {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--emerald);
+  }
+  .progress-label {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ── ADD COLUMN ── */
+  .add-col {
+    width: var(--col-w);
+    min-width: var(--col-w);
+    height: 48px;
+    border: 1px dashed var(--border-2);
+    border-radius: var(--radius);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-shrink: 0;
+    transition: all 0.12s;
+  }
+  .add-col:hover {
+    background: var(--surface);
+    border-color: var(--border-2);
+    color: var(--text-muted);
+  }
+
+  /* accent lines */
+  .accent-blue    { background: var(--blue); }
+  .accent-violet  { background: var(--violet); }
+  .accent-amber   { background: var(--amber); }
+  .accent-emerald { background: var(--emerald); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <div class="nav-brand">
+      <div class="nav-brand-icon">⊞</div>
+      Plank
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-breadcrumb">
+      <span>Product</span>
+      <span class="nav-sep">/</span>
+      <span class="active">Sprint 12</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="avatar-group">
+      <div class="avatar" style="background:var(--blue)">AL</div>
+      <div class="avatar" style="background:var(--violet)">MK</div>
+      <div class="avatar" style="background:var(--emerald)">JD</div>
+    </div>
+    <div style="width:1px;height:16px;background:var(--border);"></div>
+    <button class="btn-ghost">⬡ Filters</button>
+    <button class="btn-primary">+ New card</button>
+  </div>
+</nav>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="board-info">
+    <div class="board-eyebrow">Product Roadmap</div>
+    <div class="board-title">Sprint 12</div>
+    <div class="board-stats">
+      <div class="board-stat">🗂 <strong>12</strong> cards</div>
+      <div class="board-stat">⏱ <strong>3</strong> overdue</div>
+      <div class="board-stat">✓ <strong>3</strong> done</div>
+    </div>
+  </div>
+  <div class="toolbar-actions">
+    <div class="view-toggle">
+      <button class="view-btn active">⊟</button>
+      <button class="view-btn">≡</button>
+      <button class="view-btn">⊞</button>
+    </div>
+    <button class="btn-ghost">↕ Sort</button>
+    <button class="btn-ghost">⊕ Group by</button>
+  </div>
+</div>
+
+<!-- BOARD -->
+<div class="board">
+
+  <!-- BACKLOG -->
+  <div class="col">
+    <div class="col-accent accent-amber"></div>
+    <div class="col-header">
+      <div class="col-title">Backlog</div>
+      <div class="col-count">4</div>
+      <button class="col-menu">·  ·  ·</button>
+    </div>
+    <div class="col-body">
+
+      <div class="card">
+        <div class="card-labels">
+          <span class="label label-violet">Research</span>
+        </div>
+        <div class="card-title">Audit accessibility across all form components</div>
+        <div class="card-desc">Check WCAG AA compliance for inputs, selects, and buttons.</div>
+        <div class="card-progress">
+          <div class="progress-track"><div class="progress-fill" style="width:0%"></div></div>
+          <div class="progress-label">0/5</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-due">📅 Jun 10</div>
+          <div class="card-assignee" style="background:var(--violet)">MK</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-labels">
+          <span class="label label-blue">Feature</span>
+          <span class="label label-amber">Backend</span>
+        </div>
+        <div class="card-title">Implement webhook event retry logic</div>
+        <div class="card-footer">
+          <div class="card-due soon">📅 May 28</div>
+          <div class="card-assignee" style="background:var(--blue)">AL</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-labels"><span class="label label-emerald">Docs</span></div>
+        <div class="card-title">Write API reference for v2 endpoints</div>
+        <div class="card-desc">Cover auth, pagination, rate limits, and error codes.</div>
+        <div class="card-footer">
+          <div class="card-due">📅 Jun 3</div>
+          <div class="card-assignee" style="background:var(--emerald)">JD</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Set up Storybook for design system</div>
+        <div class="card-footer">
+          <div class="card-due" style="color:var(--text-dim)">No due date</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-footer">
+      <button class="add-card-btn">＋ Add card</button>
+    </div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="col">
+    <div class="col-accent accent-blue"></div>
+    <div class="col-header">
+      <div class="col-title">In Progress</div>
+      <div class="col-count">3</div>
+      <button class="col-menu">·  ·  ·</button>
+    </div>
+    <div class="col-body">
+
+      <div class="card">
+        <div class="card-labels">
+          <span class="label label-blue">Feature</span>
+          <span class="label label-rose">P0</span>
+        </div>
+        <div class="card-title">Redesign onboarding flow — step 2 and 3</div>
+        <div class="card-desc">Reduce drop-off by simplifying the workspace setup wizard.</div>
+        <div class="card-progress">
+          <div class="progress-track"><div class="progress-fill" style="width:60%;background:var(--blue)"></div></div>
+          <div class="progress-label">3/5</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-due overdue">⚠ May 20</div>
+          <div class="card-assignee" style="background:var(--blue)">AL</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-labels"><span class="label label-amber">Backend</span></div>
+        <div class="card-title">Migrate user sessions to Redis</div>
+        <div class="card-desc">Replace in-memory session store for horizontal scaling.</div>
+        <div class="card-progress">
+          <div class="progress-track"><div class="progress-fill" style="width:40%;background:var(--amber)"></div></div>
+          <div class="progress-label">2/5</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-due soon">📅 May 27</div>
+          <div class="card-assignee" style="background:var(--violet)">MK</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-labels"><span class="label label-violet">Research</span></div>
+        <div class="card-title">User interviews — export workflow pain points</div>
+        <div class="card-footer">
+          <div class="card-due">📅 May 29</div>
+          <div class="card-assignee" style="background:var(--emerald)">JD</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-footer">
+      <button class="add-card-btn">＋ Add card</button>
+    </div>
+  </div>
+
+  <!-- REVIEW -->
+  <div class="col">
+    <div class="col-accent accent-violet"></div>
+    <div class="col-header">
+      <div class="col-title">In Review</div>
+      <div class="col-count">2</div>
+      <button class="col-menu">·  ·  ·</button>
+    </div>
+    <div class="col-body">
+
+      <div class="card">
+        <div class="card-labels"><span class="label label-blue">Feature</span></div>
+        <div class="card-title">Dark mode — typography and icon pass</div>
+        <div class="card-desc">Final QA pass before merging to staging.</div>
+        <div class="card-progress">
+          <div class="progress-track"><div class="progress-fill" style="width:90%;background:var(--violet)"></div></div>
+          <div class="progress-label">4/5 done</div>
+        </div>
+        <div class="card-footer">
+          <div class="card-due">📅 May 24</div>
+          <div class="card-assignee" style="background:var(--blue)">AL</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-labels"><span class="label label-emerald">Docs</span></div>
+        <div class="card-title">Update changelog for v2.4 release</div>
+        <div class="card-footer">
+          <div class="card-due">📅 May 23</div>
+          <div class="card-assignee" style="background:var(--emerald)">JD</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-footer">
+      <button class="add-card-btn">＋ Add card</button>
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="col">
+    <div class="col-accent accent-emerald"></div>
+    <div class="col-header">
+      <div class="col-title">Done</div>
+      <div class="col-count">3</div>
+      <button class="col-menu">·  ·  ·</button>
+    </div>
+    <div class="col-body">
+
+      <div class="card" style="opacity:0.55;">
+        <div class="card-labels"><span class="label label-emerald">Shipped</span></div>
+        <div class="card-title">Integrate Stripe billing portal</div>
+        <div class="card-footer">
+          <div class="card-due done">✓ May 18</div>
+          <div class="card-assignee" style="background:var(--violet)">MK</div>
+        </div>
+      </div>
+
+      <div class="card" style="opacity:0.55;">
+        <div class="card-labels"><span class="label label-emerald">Shipped</span></div>
+        <div class="card-title">Set up CI/CD pipeline with GitHub Actions</div>
+        <div class="card-footer">
+          <div class="card-due done">✓ May 15</div>
+          <div class="card-assignee" style="background:var(--blue)">AL</div>
+        </div>
+      </div>
+
+      <div class="card" style="opacity:0.55;">
+        <div class="card-labels"><span class="label label-emerald">Shipped</span></div>
+        <div class="card-title">Postgres connection pooling via PgBouncer</div>
+        <div class="card-footer">
+          <div class="card-due done">✓ May 12</div>
+          <div class="card-assignee" style="background:var(--violet)">MK</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="col-footer">
+      <button class="add-card-btn">＋ Add card</button>
+    </div>
+  </div>
+
+  <!-- ADD COLUMN -->
+  <button class="add-col">＋ Add column</button>
+
+</div>
+</body>
+</html>
