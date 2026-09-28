@@ -201,3 +201,41 @@ test("? opens the shortcuts list and Esc closes it", async ({ page }) => {
     await help.getByRole("button", { name: "Got it" }).click();
     await expect(help).toBeHidden();
 });
+
+test("search matches column names too", async ({ page }) => {
+    await page.getByRole("searchbox", { name: "Search cards" }).fill("in progr");
+    await expect(page.locator(".card")).toHaveCount(2);
+    await expect(column(page, "In progress").locator(".col-count")).toHaveText("2/2");
+});
+
+test("create a label from the card editor", async ({ page }) => {
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await page.getByRole("button", { name: "＋ New label" }).click();
+    await page.getByLabel("New label name").fill("Urgent");
+    await page.getByRole("radio", { name: "rose" }).click();
+    await page.getByLabel("New label name").press("Enter");
+    // created and applied to this card
+    await expect(page.locator(".editor .label-toggle", { hasText: "Urgent" })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(page.locator(".card", { hasText: "Resume link refresh" }).locator(".label-rose", { hasText: "Urgent" })).toBeVisible();
+    // and it's filterable
+    await page.locator(".filter-bar .label-toggle", { hasText: "Urgent" }).click();
+    await expect(page.locator(".card")).toHaveCount(1);
+});
+
+test("due date year is capped at 4 digits", async ({ page }) => {
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    const due = page.locator('.editor input[type="date"]');
+    await expect(due).toHaveAttribute("max", "9999-12-31");
+    await due.fill("2030-01-15");
+    await expect(due).toHaveValue("2030-01-15");
+});
+
+test("navbar fits on a phone", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 740 });
+    for (const name of ["Reset board", "New card", "Sign in"]) {
+        const box = await page.getByRole("button", { name, exact: true }).boundingBox();
+        expect(box, name).not.toBeNull();
+        expect(box!.x + box!.width, `${name} right edge`).toBeLessThanOrEqual(375);
+    }
+});

@@ -21,7 +21,7 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
     const labelFilter = useUiStore((state) => state.labelFilter);
     const filtering = isFiltering(query, labelFilter);
     // Hidden cards keep their place in cardOrder; drops still index into the full order
-    const visibleCards = filtering ? cards.filter((card) => matchesFilter(card, query, labelFilter)) : cards;
+    const visibleCards = filtering ? cards.filter((card) => matchesFilter(card, query, labelFilter, column.title)) : cards;
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: columnId, data: { type: "column", columnId } });
     const style = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,

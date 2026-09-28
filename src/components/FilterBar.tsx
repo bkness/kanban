@@ -14,7 +14,7 @@ export default function FilterBar() {
 
     // Only counted while filtering, so the board isn't re-scanned on every change otherwise
     const matchCount = useKanbanStore((state) =>
-        active ? Object.values(state.cards).filter((c) => matchesFilter(c, query, labelFilter)).length : 0
+        active ? Object.values(state.cards).filter((c) => matchesFilter(c, query, labelFilter, state.columns[c.columnId]?.title)).length : 0
     );
 
     return (

@@ -36,19 +36,21 @@ export default function Navbar() {
                 </button>
                 <button
                     className="btn-ghost"
+                    aria-label="Reset board"
                     onClick={() => {
                         if (window.confirm("Reset to the starter board? Your changes will be lost.")) resetBoard();
                     }}
                 >
-                    ↺ Reset board
+                    ↺<span className="btn-text"> Reset board</span>
                 </button>
                 <button
                     className="btn-primary"
                     title="New card (N)"
+                    aria-label="New card"
                     disabled={!firstColumnId}
                     onClick={() => firstColumnId && openCard(addCard(firstColumnId, "New card"))}
                 >
-                    + New card
+                    +<span className="btn-text"> New card</span>
                 </button>
                 <AccountMenu />
             </div>
