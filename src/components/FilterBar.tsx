@@ -19,21 +19,25 @@ export default function FilterBar() {
 
     return (
         <div className="filter-bar" role="search">
-            <input
-                id="board-search"
-                className="filter-search"
-                type="search"
-                placeholder="Search cards…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                        setQuery("");
-                        e.currentTarget.blur();
-                    }
-                }}
-                aria-label="Search cards"
-            />
+            <div className="filter-search-wrap">
+                <input
+                    id="board-search"
+                    className="filter-search"
+                    type="search"
+                    placeholder="Search cards…"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                            setQuery("");
+                            e.currentTarget.blur();
+                        }
+                    }}
+                    aria-label="Search cards"
+                    aria-keyshortcuts="/"
+                />
+                {!query && <kbd className="filter-kbd" aria-hidden="true">/</kbd>}
+            </div>
             <div className="filter-labels">
                 {labels.map((label) => (
                     <button

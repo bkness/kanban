@@ -13,6 +13,9 @@ type UiState = {
     setQuery: (query: string) => void;
     toggleLabelFilter: (labelId: string) => void;
     clearFilters: () => void;
+
+    helpOpen: boolean;
+    setHelpOpen: (open: boolean) => void;
 };
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -29,4 +32,7 @@ export const useUiStore = create<UiState>()((set) => ({
             : [...state.labelFilter, labelId],
     })),
     clearFilters: () => set({ query: '', labelFilter: [] }),
+
+    helpOpen: false,
+    setHelpOpen: (helpOpen) => set({ helpOpen }),
 }));

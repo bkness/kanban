@@ -155,3 +155,49 @@ test("clear and Escape reset the filter", async ({ page }) => {
     await expect(search).toHaveValue("");
     await expect(page.locator(".card")).toHaveCount(9);
 });
+
+test("/ focuses search without typing a slash", async ({ page }) => {
+    await page.locator("body").press("/");
+    const search = page.getByRole("searchbox", { name: "Search cards" });
+    await expect(search).toBeFocused();
+    await expect(search).toHaveValue("");
+});
+
+test("n adds a card to the first column and opens it", async ({ page }) => {
+    await page.locator("body").press("n");
+    await expect(editor(page)).toBeVisible();
+    await expect(page.locator(".editor-title")).toHaveValue("New card");
+    await expect(column(page, "Up next").locator(".card")).toHaveCount(4);
+});
+
+test("shortcuts don't fire while typing or while a dialog is open", async ({ page }) => {
+    // typing "n" in the search box searches; it doesn't create a card
+    await page.getByRole("searchbox", { name: "Search cards" }).fill("n");
+    await page.getByRole("searchbox", { name: "Search cards" }).press("n");
+    await expect(editor(page)).toHaveCount(0);
+    await page.locator(".filter-clear").click();
+    await expect(page.locator(".card")).toHaveCount(9);
+
+    // with the editor open, "n" and "?" belong to the editor
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await page.getByRole("button", { name: "Done" }).focus();
+    await page.keyboard.press("n");
+    await page.keyboard.press("?");
+    await expect(page.locator("dialog[open]")).toHaveCount(1);
+    await page.keyboard.press("Escape");
+    await expect(page.locator(".card")).toHaveCount(9);
+});
+
+test("? opens the shortcuts list and Esc closes it", async ({ page }) => {
+    await page.locator("body").press("?");
+    const help = page.getByRole("dialog", { name: "Keyboard shortcuts" });
+    await expect(help).toBeVisible();
+    await expect(help).toContainText("Pick up / drop the focused card");
+    await page.keyboard.press("Escape");
+    await expect(help).toBeHidden();
+
+    await page.getByRole("button", { name: "Keyboard shortcuts" }).click();
+    await expect(help).toBeVisible();
+    await help.getByRole("button", { name: "Got it" }).click();
+    await expect(help).toBeHidden();
+});

@@ -8,6 +8,7 @@ export default function Navbar() {
     const addCard = useKanbanStore((state) => state.addCard);
     const firstColumnId = useKanbanStore((state) => state.columnOrder[0]);
     const openCard = useUiStore((state) => state.openCard);
+    const setHelpOpen = useUiStore((state) => state.setHelpOpen);
 
     return (
         <nav className="nav">
@@ -25,6 +26,14 @@ export default function Navbar() {
             </div>
             <div className="nav-right">
                 <button
+                    className="btn-ghost btn-icon"
+                    aria-label="Keyboard shortcuts"
+                    title="Keyboard shortcuts (?)"
+                    onClick={() => setHelpOpen(true)}
+                >
+                    ?
+                </button>
+                <button
                     className="btn-ghost"
                     onClick={() => {
                         if (window.confirm("Reset to the starter board? Your changes will be lost.")) resetBoard();
@@ -34,6 +43,7 @@ export default function Navbar() {
                 </button>
                 <button
                     className="btn-primary"
+                    title="New card (N)"
                     disabled={!firstColumnId}
                     onClick={() => firstColumnId && openCard(addCard(firstColumnId, "New card"))}
                 >
