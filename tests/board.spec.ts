@@ -259,3 +259,34 @@ test("?sample opens the busy board without touching the guest board", async ({ p
     await expect(page.locator(".card", { hasText: "Guest edit" })).toBeVisible();
     await expect(page.locator(".card", { hasText: "Sample edit" })).toHaveCount(0);
 });
+
+test("column tabs appear only when columns overflow, and jump to a column", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.locator(".col-tabs")).toHaveCount(0);   // 3 columns fit
+
+    await page.goto("/?sample");
+    const tabs = page.getByRole("navigation", { name: "Jump to column" });
+    await expect(tabs.locator(".col-tab")).toHaveCount(8);
+    const shipped = page.locator('.board [data-column-id="shipped"]');
+    await expect(shipped).not.toBeInViewport({ ratio: 0.6 });
+    await tabs.getByRole("button", { name: /Shipped/ }).click();
+    await expect(shipped).toBeInViewport({ ratio: 0.9 });
+    await expect(tabs.getByRole("button", { name: /Shipped/ })).toHaveClass(/is-visible/);
+});
+
+test("tall columns scroll inside; the page itself never scrolls", async ({ page }) => {
+    await page.setViewportSize({ width: 960, height: 700 });
+    await page.goto("/?sample");
+    await expect(page.locator(".card").first()).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0);
+    // Backlog is taller than the window, but its Add card button stays on screen
+    await expect(page.locator('[data-column-id="backlog"] .add-card-btn')).toBeInViewport();
+});
+
+test("move a card to another column from the editor", async ({ page }) => {
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await page.getByLabel("Column", { exact: true }).selectOption({ label: "Shipped" });
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(column(page, "Shipped").locator(".card", { hasText: "Resume link refresh" })).toBeVisible();
+    await expect(column(page, "In progress").locator(".card")).toHaveCount(1);
+});

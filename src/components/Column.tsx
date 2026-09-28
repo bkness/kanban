@@ -62,7 +62,7 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
     };
 
     return (
-        <div ref={setNodeRef} className="col" style={style} {...attributes}>
+        <div ref={setNodeRef} className="col" style={style} {...attributes} data-column-id={columnId}>
             {/* the last ("done") column is always green, like the mockup */}
             <div className={`col-accent accent-${isDoneColumn ? "emerald" : ACCENTS[index % 3]}`} />
             <div className="col-header">
