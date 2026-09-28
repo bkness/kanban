@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useShallow } from "zustand/shallow";
 import { useKanbanStore } from "../store/kanbanStore";
 import { useUiStore } from "../store/uiStore";
@@ -11,6 +12,8 @@ export default function FilterBar() {
     const toggleLabelFilter = useUiStore((state) => state.toggleLabelFilter);
     const clearFilters = useUiStore((state) => state.clearFilters);
     const active = isFiltering(query, labelFilter);
+    // Phones only (CSS): the chips fold behind a toggle to save vertical space
+    const [labelsOpen, setLabelsOpen] = useState(false);
 
     // Only counted while filtering, so the board isn't re-scanned on every change otherwise
     const matchCount = useKanbanStore((state) =>
@@ -38,7 +41,17 @@ export default function FilterBar() {
                 />
                 {!query && <kbd className="filter-kbd" aria-hidden="true">/</kbd>}
             </div>
-            <div className="filter-labels">
+            {labels.length > 0 && (
+                <button
+                    className="filter-toggle"
+                    aria-expanded={labelsOpen}
+                    aria-controls="filter-labels"
+                    onClick={() => setLabelsOpen((o) => !o)}
+                >
+                    Labels{labelFilter.length > 0 && <span className="filter-toggle-count">{labelFilter.length}</span>}
+                </button>
+            )}
+            <div id="filter-labels" className={`filter-labels${labelsOpen ? " is-open" : ""}`}>
                 {labels.map((label) => (
                     <button
                         key={label.id}

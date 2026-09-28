@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
+/* Design: dark lanes, cards as the only real objects, one loud thing per
+   card. Phone overrides are collected in one @media block at the end. */
 
 :root {
     --bg:         #0C0C10;
@@ -22,33 +24,29 @@
     --amber-dim:  rgba(251,191,36,0.12);
     --rose:       #FB7185;
     --rose-dim:   rgba(251,113,133,0.12);
-    --col-w:      288px;
     --radius:     12px;
     --radius-sm:  7px;
     --shadow:     0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
     --shadow-sm:  0 2px 8px rgba(0,0,0,0.3);
+
+    /* Lanes stretch between --col-min and --col-max and only scroll once
+       they'd drop below --col-min. Collapsed columns are --rail-w wide. */
+    --col-min:    232px;   /* 5 lanes + 3 rails + add rail fit in 1440px */
+    --col-max:    380px;
+    --rail-w:     36px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: "DM sans", sans-serif;
-  background: var(--bg); 
+  background: var(--bg);
   color: var(--text);
   font-size: 14px;
   line-height:1.5;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-
-/* body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
-} */
 
 .nav {
   height: 54px;
@@ -74,7 +72,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-} 
+}
 
 .nav-brand-icon {
   width: 28px; height: 28px;
@@ -87,38 +85,7 @@ body {
   box-shadow: 0 0 12px rgba(79,142,255,0.3);
 }
 
-.nav-divider { width: 1px; height: 16px; background: var(--border); }
-
-.nav-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-.nav-breadcrumb .active { color: var(--text); font-weight: 500; }
-.nav-sep { color: var(--text-dim); }
-
 .nav-right { display: flex; align-items: center; gap: 8px; }
-
-.avatar-group { display: flex; }
-.avatar {
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--surface);
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: -6px;
-  color: var(--bg);
-  letter-spacing: 0;
-}
-.avatar:first-child { margin-left: 0; }
-.avatar:nth-child(1) { background: var(--blue); }
-.avatar:nth-child(2) { background: var(--violet); }
-.avatar:nth-child(3) { background: var(--emerald); }
 
 .btn-ghost {
   height: 30px; padding: 0 12px;
@@ -148,9 +115,26 @@ body {
   box-shadow: 0 0 12px var(--blue-glow);
 }
 .btn-primary:hover { opacity: 0.88; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-icon { width: 30px; padding: 0; justify-content: center; font-weight: 600; }
+
+.btn-danger {
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--rose);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 1;
+  font-family: inherit;
+  cursor: pointer;
+}
+.btn-danger:hover { background: var(--rose-dim); }
 
 /*--------------
-|    TOOLBAR    | 
+|    TOOLBAR    |
 ---------------*/
 
 .toolbar {
@@ -161,7 +145,6 @@ body {
   position: relative;
 }
 
-.board-info {}
 .board-eyebrow {
   font-size: 11px;
   font-weight: 600;
@@ -176,81 +159,73 @@ body {
   letter-spacing: -0.5px;
   color: var(--text);
 }
+
+/* Stats: inline mono text, overdue in red */
 .board-stats {
   display: flex;
-  gap: 16px;
   margin-top: 6px;
-}
-.board-stat {
-  display: flex;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 2px;
-}
-.board-stat strong { color: var(--text-muted); font-weight: 500;}
-
-.toolbar-actions { display: flex; align-items: center; gap: 6px; }
-
-.view-toggle {
-  display: flex;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 3px;
-  gap: 2px;
-}
-.view-btn {
-  width: 26px; height: 24px;
-  border-radius: 4px;
-  border: none;
-  background: transparent;
+  font: 500 12px/1 'DM Mono', monospace;
   color: var(--text-dim);
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.1s;
 }
-.view-btn.active { background: var(--surface-3); color: var(--text); }
+.board-stats > span + span::before { content: "·"; margin: 0 10px; color: var(--border-2); }
+.board-stats strong { color: var(--text-muted); font-weight: 500; }
+.board-stats .is-warn,
+.board-stats .is-warn strong { color: var(--rose); }
 
 /*--------------
-|    BOARD    | 
+|    BOARD    |
 ---------------*/
 
+/* The app fills the window exactly: navbar and toolbar take their natural
+   height, the board gets the rest. Columns cap at the board's height and
+   scroll inside, so the page never scrolls and the board's horizontal
+   scrollbar sits at the bottom of the window. */
+.app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.board-wrapper { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
 .board {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  gap: 12px;
-  padding: 18px 22px 48px;
+  gap: 10px;
+  padding: 14px 22px 12px;
   overflow-x: auto;
+  overflow-y: hidden;
   align-items: flex-start;
-  min-height: calc(100vh - 150px);
+  scroll-padding-inline: 22px;
   position: relative;
   z-index: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-2) transparent;
 }
-
-  .board::-webkit-scrollbar { height: 5px; }
-  .board::-webkit-scrollbar-track { background: transparent; }
-  .board::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+.board::-webkit-scrollbar { height: 8px; }
+.board::-webkit-scrollbar-track { background: transparent; }
+.board::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
 
 /*--------------
 |   COLUMNS    |
 ---------------*/
 
+/* Lanes, not boxes: the accent rail and spacing define a column */
 .col {
-  width: var(--col-w);
-  min-width: var(--col-w);
-  background: var(--surface);
   border-radius: var(--radius);
-  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
+}
+.board > .col {
+  max-height: 100%;
+  width: auto;
+  min-width: var(--col-min);
+  max-width: var(--col-max);
+  flex: 1 0 var(--col-min);
 }
 
 .col-accent {
-  height: 3px;
+  height: 2px;
   width: 100%;
+  border-radius: 2px;
+  opacity: 0.85;
   background: var(--blue);
 }
 
@@ -258,8 +233,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
+  padding: 12px 4px 8px;
 }
 
 .col-drag {
@@ -269,7 +243,6 @@ body {
   line-height: 1;
   padding: 2px 3px;
   border-radius: 4px;
-  transition: color 0.1s;
   user-select: none;
 }
 .col-drag:hover { color: var(--text-muted); }
@@ -282,229 +255,6 @@ body {
   flex: 1;
   letter-spacing: -0.2px;
 }
-
-.col-count {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-dim);
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 99px;
-  padding: 1px 7px;
-  min-width: 20px;
-  text-align: center;
-}
-
-.col-menu {
-  width: 24px; height: 24px;
-  border: none;
-  background: transparent;
-  color: var(--text-dim);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 16px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.1s;
-}
-.col-menu:hover { background: var(--surface-2); color: var(--text-muted); }
-
-.col-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 60px;
-  max-height: calc(100vh - 280px);
-}
-.col-body::-webkit-scrollbar { width: 4px; }
-.col-body::-webkit-scrollbar-track { background: transparent; }
-.col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
-
-.col-footer {
-  padding: 8px 10px 10px;
-  border-top: 1px solid var(--border);
-}
-
-/*--------------
-|    CARDS     |
----------------*/
-
-.card {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, transform 0.15s;
-  position: relative;
-  overflow: hidden;
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent 60%);
-  pointer-events: none;
-}
-
-.card:hover {
-  border-color: var(--border-2);
-  background: var(--surface-3);
-  transform: translateY(-1px);
-}
-
-.card-labels { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
-
-.label {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.03em;
-}
-.label-blue    { background: var(--blue-dim);    color: var(--blue); }
-.label-violet  { background: var(--violet-dim);  color: var(--violet); }
-.label-emerald { background: var(--emerald-dim); color: var(--emerald); }
-.label-amber   { background: var(--amber-dim);   color: var(--amber); }
-.label-rose    { background: var(--rose-dim);    color: var(--rose); }
-
-.card-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.45;
-  letter-spacing: -0.1px;
-}
-
-.card-desc {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 5px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
-}
-
-.card-due {
-  font-size: 11px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.card-due.overdue { color: var(--rose); }
-.card-due.soon    { color: var(--amber); }
-.card-due.done    { color: var(--emerald); }
-
-.card-assignee {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  font-size: 9px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--bg);
-}
-
-.card-progress {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.progress-track {
-  flex: 1;
-  height: 3px;
-  background: var(--border);
-  border-radius: 99px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  border-radius: 99px;
-  background: var(--emerald);
-}
-.progress-label {
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  color: var(--text-dim);
-  white-space: nowrap;
-}
-
-/*--------------
-|  ADD COLUMN  |
----------------*/
-
-.add-col {
-  width: var(--col-w);
-  min-width: var(--col-w);
-  height: 48px;
-  border: 1px dashed var(--border-2);
-  border-radius: var(--radius);
-  background: transparent;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-dim);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  flex-shrink: 0;
-  transition: all 0.12s;
-}
-.add-col:hover {
-  background: var(--surface);
-  border-color: var(--border-2);
-  color: var(--text-muted);
-}
-
-.add-card-btn {
-  width: 100%;
-  padding: 6px 8px;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-dim);
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.12s;
-}
-.add-card-btn:hover {
-  background: var(--surface-2);
-  border-color: var(--border-2);
-  color: var(--text-muted);
-}
-
-/*--------------
-|    ACCENTS   |
----------------*/
-
-.accent-blue    { background: var(--blue); }
-.accent-violet  { background: var(--violet); }
-.accent-amber   { background: var(--amber); }
-.accent-emerald { background: var(--emerald); }
-/* ── Interactions added with the design pass ─────────────── */
 
 /* Column title is a button (click to rename); keep it looking like text */
 button.col-title {
@@ -534,6 +284,32 @@ button.col-title:hover { background: var(--surface-2); }
   outline: none;
   box-shadow: 0 0 0 3px var(--blue-glow);
 }
+
+.col-count {
+  font: 500 11px 'DM Mono', monospace;
+  color: var(--text-dim);
+  border-radius: 99px;
+  text-align: center;
+}
+
+.col-menu {
+  width: 24px; height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.col-menu:hover { background: var(--surface-2); color: var(--text-muted); }
+
+/* Drag handle and menu only show on hover/focus (always on touch) */
+.col-drag, .col-menu { opacity: 0; transition: opacity 0.15s, background 0.1s, color 0.1s; }
+.col:hover .col-drag, .col:hover .col-menu,
+.col:focus-within .col-drag, .col:focus-within .col-menu,
+.col-menu[aria-expanded="true"] { opacity: 1; }
+@media (hover: none) { .col-drag, .col-menu { opacity: 1; } }
 
 .col-menu-wrap { position: relative; }
 
@@ -567,12 +343,264 @@ button.col-title:hover { background: var(--surface-2); }
 .col-popover button:hover { background: var(--surface-2); color: var(--text); }
 .col-popover button.danger:hover { background: var(--rose-dim); color: var(--rose); }
 
-/* Cards: clickable to edit; shipped cards step back. flex-shrink: 0 so a
-   full column scrolls instead of squashing cards and clipping text */
-.card { cursor: pointer; flex-shrink: 0; }
+.col-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 4px 2px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 60px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.col-body::-webkit-scrollbar { width: 4px; }
+.col-body::-webkit-scrollbar-track { background: transparent; }
+.col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+.col-footer { padding: 0 2px 8px; }
+
+.col-empty {
+  padding: 18px 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+/* ── Collapsed columns: a rail. Still a drop target; click to expand ── */
+.board > .col.is-collapsed {
+  flex: 0 0 var(--rail-w);
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  max-width: var(--rail-w);
+  align-self: stretch;          /* full-height strip = big click + drop target */
+}
+.col-rail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 12px 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.col-rail:hover { background: var(--surface); color: var(--text); }
+.col-rail:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.col-rail-title {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+.col-rail-count { font: 500 11px 'DM Mono', monospace; color: var(--text-dim); }
+
+/* Collapse button: hover-only, like the menu */
+.col-collapse {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.1s, color 0.1s;
+}
+.col-collapse:hover { background: var(--surface-2); color: var(--text-muted); }
+.col-collapse:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; opacity: 1; }
+.col:hover .col-collapse, .col:focus-within .col-collapse { opacity: 1; }
+@media (hover: none) { .col-collapse { opacity: 1; } }
+
+/*--------------
+|    CARDS     |
+---------------*/
+
+/* Cards are the only real objects on the board. flex-shrink: 0 so a full
+   column scrolls instead of squashing cards and clipping text */
+.card {
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset, var(--shadow-sm);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), transparent 60%);
+  pointer-events: none;
+}
+
+.card:hover {
+  border-color: var(--border-2);
+  background: var(--surface-2);
+  transform: translateY(-1px);
+}
+
+/* Shipped cards step back */
 .card.is-dragging { opacity: 0.4; }
 .card.is-done .card-title { color: var(--text-muted); }
 .card.is-done { opacity: 0.75; }
+
+.card-labels { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+
+/* Label chips (filter bar, editor). On cards they become a dot + mono text below */
+.label {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+.label-blue    { background: var(--blue-dim);    color: var(--blue); }
+.label-violet  { background: var(--violet-dim);  color: var(--violet); }
+.label-emerald { background: var(--emerald-dim); color: var(--emerald); }
+.label-amber   { background: var(--amber-dim);   color: var(--amber); }
+.label-rose    { background: var(--rose-dim);    color: var(--rose); }
+
+/* Tags on cards: glowing dot + mono text, no fill */
+.card .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  font: 500 11px 'DM Mono', monospace;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  color: var(--text-muted);
+}
+.card .label::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--dot, var(--text-dim));
+  box-shadow: 0 0 6px var(--dot, transparent);
+}
+.card .label-blue    { --dot: var(--blue); }
+.card .label-violet  { --dot: var(--violet); }
+.card .label-emerald { --dot: var(--emerald); }
+.card .label-amber   { --dot: var(--amber); }
+.card .label-rose    { --dot: var(--rose); }
+
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+  letter-spacing: -0.1px;
+}
+
+.card-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* No divider, just small mono text */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.card-due {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.card-due.overdue { color: var(--rose); }
+.card-due.soon    { color: var(--amber); }
+.card-due.done    { color: var(--emerald); }
+
+/*--------------
+|  ADD CARD /  |
+|  ADD COLUMN  |
+---------------*/
+
+/* Add column is a rail too, so it doesn't eat a lane's worth of width */
+.add-col {
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  align-self: stretch;
+  margin-top: 10px;
+  padding: 12px 0;
+  writing-mode: vertical-rl;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.add-col:hover {
+  background: var(--surface);
+  border-color: var(--border-2);
+  color: var(--text-muted);
+}
+
+/* Ghosted until the column is hovered */
+.add-card-btn {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px dashed transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.12s;
+}
+.add-card-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--border-2);
+  color: var(--text-muted);
+}
+.col:hover .add-card-btn { border-color: var(--border); }
+
+/*--------------
+|    ACCENTS   |
+---------------*/
+
+.accent-blue    { background: var(--blue); }
+.accent-violet  { background: var(--violet); }
+.accent-amber   { background: var(--amber); }
+.accent-emerald { background: var(--emerald); }
 
 /* Keyboard focus that matches the blue accent */
 .card:focus-visible,
@@ -588,21 +616,6 @@ button.col-title:focus-visible,
   outline-offset: 2px;
 }
 
-.btn-danger {
-  padding: 7px 14px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--rose);
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 1;
-  font-family: inherit;
-  cursor: pointer;
-}
-.btn-danger:hover { background: var(--rose-dim); }
-.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -611,7 +624,10 @@ button.col-title:focus-visible,
   white-space: nowrap;
 }
 
-/* Card editor dialog */
+/*--------------
+|  CARD EDITOR |
+---------------*/
+
 .editor {
   width: min(520px, calc(100vw - 32px));
   margin: auto;
@@ -625,8 +641,6 @@ button.col-title:focus-visible,
 .editor::backdrop { background: rgba(6, 6, 10, 0.72); }
 
 .editor-body { display: grid; gap: 18px; padding: 22px 22px 18px; }
-
-.editor-meta { font-size: 12px; color: var(--text-dim); }
 
 .editor-field { display: grid; gap: 6px; border: none; }
 
@@ -664,6 +678,20 @@ button.col-title:focus-visible,
 }
 .editor-input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
 
+/* Column picker ("Move to") at the top of the editor */
+.editor-column {
+  justify-self: start;
+  padding: 3px 24px 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.editor-column:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
 .editor-labels { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* Off labels are outlined and dim; on labels use the card chip colours */
@@ -675,6 +703,39 @@ button.col-title:focus-visible,
 }
 .label-toggle:hover { opacity: 0.75; }
 .label-toggle.is-on { opacity: 1; border-color: currentColor; }
+
+/* "+ New label" */
+.label-new {
+  justify-self: start;
+  margin-top: 8px;
+  padding: 3px 9px;
+  border: 1px dashed var(--border-2);
+  border-radius: 20px;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.label-new:hover { color: var(--text); border-color: var(--text-dim); }
+.label-new:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.label-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.label-form-input { flex: 1 1 140px; min-width: 0; }
+.label-swatches { display: flex; gap: 6px; }
+.label-swatch {
+  width: 20px; height: 20px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.label-swatch.is-on { border-color: var(--text); }
+.label-swatch:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.swatch-blue    { background: var(--blue); }
+.swatch-violet  { background: var(--violet); }
+.swatch-emerald { background: var(--emerald); }
+.swatch-amber   { background: var(--amber); }
+.swatch-rose    { background: var(--rose); }
 
 .editor-due { display: flex; gap: 8px; align-items: center; }
 .editor-due .editor-input { width: auto; }
@@ -691,7 +752,10 @@ button.col-title:focus-visible,
   .card, .col { transition: none !important; }
 }
 
-/* ── Search + label filter ───────────────────────────── */
+/*------------------
+|  SEARCH + FILTER |
+-------------------*/
+
 .filter-bar {
   display: flex;
   align-items: center;
@@ -699,9 +763,10 @@ button.col-title:focus-visible,
   justify-content: flex-end;
   gap: 8px;
 }
+.filter-search-wrap { position: relative; display: flex; }
 .filter-search {
   width: 200px;
-  padding: 7px 11px;
+  padding: 7px 34px 7px 11px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
@@ -711,7 +776,59 @@ button.col-title:focus-visible,
 }
 .filter-search::placeholder { color: var(--text-dim); }
 .filter-search:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.filter-kbd {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.filter-search:focus + .filter-kbd { display: none; }
+
 .filter-labels { display: flex; flex-wrap: wrap; gap: 5px; }
+
+/* Filter chips: outlined when off, glowing when on */
+.filter-bar .label-toggle {
+  opacity: 1;
+  background: transparent;
+  border: 1px solid color-mix(in oklab, currentColor 35%, transparent);
+  border-radius: 99px;
+  padding: 3px 10px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.filter-bar .label-toggle:hover { border-color: color-mix(in oklab, currentColor 70%, transparent); }
+.filter-bar .label-toggle.is-on {
+  background: color-mix(in oklab, currentColor 16%, transparent);
+  border-color: currentColor;
+  box-shadow: 0 0 12px color-mix(in oklab, currentColor 35%, transparent);
+}
+
+/* Phone-only "Labels" toggle that folds the chips away */
+.filter-toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.filter-toggle[aria-expanded="true"] { color: var(--text); border-color: var(--border-2); }
+.filter-toggle:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.filter-toggle-count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-size: 11px;
+  text-align: center;
+}
+
 .filter-status {
   display: flex;
   align-items: center;
@@ -729,27 +846,55 @@ button.col-title:focus-visible,
 }
 .filter-clear:hover { text-decoration: underline; }
 .filter-clear:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.col-empty {
-  padding: 18px 8px;
-  text-align: center;
-  font-size: 12px;
+
+/*--------------
+| COLUMN TABS  |
+---------------*/
+
+/* Shown when columns overflow (or, on phones, when any is collapsed).
+   Text + underline; on-screen columns get the blue underline */
+.col-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 12px 22px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.col-tabs::-webkit-scrollbar { display: none; }
+.col-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 6px 10px 8px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
   color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.col-tab:hover { color: var(--text); border-color: var(--border-2); }
+.col-tab.is-visible { color: var(--text); background: none; border-bottom-color: var(--blue); }
+.col-tab.is-collapsed { color: var(--text-dim); font-style: italic; }
+.col-tab:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.col-tab-count {
+  border-radius: 10px;
+  color: var(--text-dim);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  text-align: center;
 }
 
-@media (max-width: 720px) {
-  .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
-  .filter-bar { justify-content: flex-start; }
-  .filter-search { flex: 1 1 100%; width: auto; font-size: 16px; } /* 16px: no iOS focus zoom */
-  /* the navbar wrapped every word on phones */
-  .nav-divider, .nav-breadcrumb { display: none; }
-  .nav { padding: 0 12px; gap: 8px; }
-  .nav-brand { font-size: 14px; gap: 6px; }
-  .nav-right { gap: 6px; }
-  .nav-brand, .nav-right button { white-space: nowrap; }
-  .nav-right button { padding: 0 10px; font-size: 12px; }
-}
+/*--------------------
+| KEYBOARD SHORTCUTS |
+---------------------*/
 
-/* ── Keyboard shortcuts ─────────────────────────────── */
 kbd {
   display: inline-block;
   min-width: 20px;
@@ -762,17 +907,6 @@ kbd {
   font: 500 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
   text-align: center;
 }
-.filter-search-wrap { position: relative; display: flex; }
-.filter-search-wrap .filter-search { padding-right: 34px; }
-.filter-kbd {
-  position: absolute;
-  right: 9px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-.filter-search:focus + .filter-kbd { display: none; }
-.btn-icon { width: 30px; padding: 0; justify-content: center; font-weight: 600; }
 
 .shortcuts { width: min(420px, calc(100vw - 32px)); }
 .shortcuts-body { padding: 20px 22px 8px; }
@@ -790,12 +924,10 @@ kbd {
 .shortcuts-row dt { display: flex; gap: 4px; flex-shrink: 0; }
 .shortcuts-row dd { margin: 0; font-size: 13px; color: var(--text-muted); text-align: right; }
 
-@media (max-width: 720px) {
-  .filter-search-wrap { flex: 1 1 100%; }
-  .filter-kbd, .btn-icon { display: none; }   /* no hardware keyboard on phones, usually */
-}
+/*------------------
+| ACCOUNTS + SYNC  |
+-------------------*/
 
-/* ── Accounts + sync ────────────────────────────────── */
 .auth { width: min(400px, calc(100vw - 32px)); }
 .auth-body { display: grid; gap: 8px; padding: 20px 22px 14px; }
 .auth-body .shortcuts-title { margin-bottom: 2px; }
@@ -851,50 +983,7 @@ kbd {
   color: var(--text);
 }
 
-@media (max-width: 720px) {
-  .account-email { display: none; }     /* the sync dot alone on phones */
-  .account-btn { padding: 0 10px; }
-}
-
-/* ── New label ──────────────────────────────────────── */
-.label-new {
-  justify-self: start;
-  margin-top: 8px;
-  padding: 3px 9px;
-  border: 1px dashed var(--border-2);
-  border-radius: 20px;
-  background: none;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-.label-new:hover { color: var(--text); border-color: var(--text-dim); }
-.label-new:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.label-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
-.label-form-input { flex: 1 1 140px; min-width: 0; }
-.label-swatches { display: flex; gap: 6px; }
-.label-swatch {
-  width: 20px; height: 20px;
-  padding: 0;
-  border: 2px solid transparent;
-  border-radius: 50%;
-  cursor: pointer;
-}
-.label-swatch.is-on { border-color: var(--text); }
-.label-swatch:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
-.swatch-blue    { background: var(--blue); }
-.swatch-violet  { background: var(--violet); }
-.swatch-emerald { background: var(--emerald); }
-.swatch-amber   { background: var(--amber); }
-.swatch-rose    { background: var(--rose); }
-
-@media (max-width: 720px) {
-  .btn-text { display: none; }            /* ↺ and + only on phones */
-  .nav-right button { min-width: 32px; justify-content: center; }
-}
-
-/* ── ?sample banner ─────────────────────────────────── */
+/* ?sample banner */
 .sample-banner {
   display: flex;
   flex-wrap: wrap;
@@ -907,3 +996,49 @@ kbd {
   font-size: 12px;
 }
 .sample-banner a { color: var(--text); }
+
+/*--------------
+|    PHONES    |
+---------------*/
+
+@media (max-width: 720px) {
+  /* navbar: brand + icon-only buttons (↺ and +) */
+  .nav { padding: 0 12px; gap: 8px; }
+  .nav-brand { font-size: 14px; gap: 6px; }
+  .nav-right { gap: 6px; }
+  .nav-brand, .nav-right button { white-space: nowrap; }
+  .nav-right button { padding: 0 10px; font-size: 12px; min-width: 32px; justify-content: center; }
+  .btn-text { display: none; }
+  .filter-kbd, .btn-icon { display: none; }   /* no hardware keyboard on phones, usually */
+  .account-email { display: none; }           /* the sync dot alone */
+
+  /* compact header: the navbar already says "Kanban" */
+  .toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
+  .board-eyebrow { display: none; }
+  .board-title { font-size: 18px; }
+
+  /* search and the Labels toggle share a row; chips fold away */
+  .filter-bar { justify-content: flex-start; }
+  .filter-search-wrap { flex: 1 1 0; min-width: 0; }
+  .filter-search { flex: 1 1 100%; width: auto; font-size: 16px; } /* 16px: no iOS focus zoom */
+  .filter-toggle { display: flex; align-self: stretch; }
+  .filter-labels { display: none; flex-basis: 100%; }
+  .filter-labels.is-open { display: flex; }
+
+  /* one lane per swipe, narrower than the screen so the next one peeks in */
+  .board {
+    padding: 12px 16px 10px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
+  }
+  .board > .col {
+    flex: none;
+    width: calc(100vw - 56px);
+    min-width: calc(100vw - 56px);
+    max-width: none;
+    scroll-snap-align: start;
+  }
+  /* rails would push the first lane off-screen; the tabs open collapsed columns instead */
+  .board > .col.is-collapsed { display: none; }
+  .col-tabs { padding: 10px 16px 0; }
+}

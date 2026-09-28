@@ -249,7 +249,7 @@ test("?sample opens the busy board without touching the guest board", async ({ p
     await page.goto("/?sample");
     await expect(page.locator(".sample-banner")).toBeVisible();
     await expect(page.locator(".col")).toHaveCount(8);
-    await expect(page.locator(".card")).toHaveCount(32);
+    await expect(page.locator(".board-stats")).toContainText("32 cards");
     await page.locator(".card").first().click();
     await page.locator(".editor-title").fill("Sample edit");
     await page.getByRole("button", { name: "Done" }).click();
@@ -258,4 +258,90 @@ test("?sample opens the busy board without touching the guest board", async ({ p
     await expect(page.locator(".sample-banner")).toHaveCount(0);
     await expect(page.locator(".card", { hasText: "Guest edit" })).toBeVisible();
     await expect(page.locator(".card", { hasText: "Sample edit" })).toHaveCount(0);
+});
+
+test("column tabs appear only when columns overflow, and jump to a column", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.locator(".col-tabs")).toHaveCount(0);   // 3 columns fit
+
+    await page.goto("/?sample");
+    const tabs = page.getByRole("navigation", { name: "Jump to column" });
+    await expect(tabs.locator(".col-tab")).toHaveCount(8);
+    const shipped = page.locator('.board [data-column-id="shipped"]');
+    await expect(shipped).not.toBeInViewport({ ratio: 0.6 });
+    await tabs.getByRole("button", { name: /Shipped/ }).click();
+    await expect(shipped).toBeInViewport({ ratio: 0.9 });
+    await expect(tabs.getByRole("button", { name: /Shipped/ })).toHaveClass(/is-visible/);
+    await expect(shipped.locator(".card")).toHaveCount(6);                 // it was collapsed; the tab expanded it
+});
+
+test("columns collapse to a rail and expand again, and it persists", async ({ page }) => {
+    await page.getByRole("button", { name: "Collapse Shipped", exact: true }).click();
+    const shipped = column(page, "Shipped");
+    await expect(page.locator('[data-column-id="done"]')).toHaveClass(/is-collapsed/);
+    await expect(page.locator('[data-column-id="done"] .card')).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Expand Shipped \(4 cards\)/ })).toBeVisible();
+    await page.reload();
+    await page.getByRole("button", { name: /Expand Shipped/ }).click();
+    await expect(shipped.locator(".card")).toHaveCount(4);
+});
+
+test("on a wide screen the sample board's active lanes fit without scrolling", async ({ page }) => {
+    await page.goto("/?sample");
+    for (const id of ["next", "progress", "review", "blocked", "qa"]) {
+        await expect(page.locator(`.board [data-column-id="${id}"]`)).toBeInViewport({ ratio: 1 });
+    }
+});
+
+test("tall columns scroll inside; the page itself never scrolls", async ({ page }) => {
+    await page.setViewportSize({ width: 960, height: 700 });
+    await page.goto("/?sample");
+    await expect(page.locator(".card").first()).toBeVisible();
+    await page.getByRole("button", { name: /Expand Backlog/ }).click();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0);
+    // Backlog is taller than the window, but its Add card button stays on screen
+    await expect(page.locator('[data-column-id="backlog"] .add-card-btn')).toBeInViewport();
+});
+
+test("move a card to another column from the editor", async ({ page }) => {
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await page.getByLabel("Column", { exact: true }).selectOption({ label: "Shipped" });
+    await page.getByRole("button", { name: "Done" }).click();
+    await expect(column(page, "Shipped").locator(".card", { hasText: "Resume link refresh" })).toBeVisible();
+    await expect(column(page, "In progress").locator(".card")).toHaveCount(1);
+});
+
+test("Enter on a collapsed rail expands it (it doesn't start a drag)", async ({ page }) => {
+    await page.goto("/?sample");
+    const rail = page.getByRole("button", { name: /Expand Ideas/ });
+    await rail.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator('[data-column-id="ideas"]')).not.toHaveClass(/is-collapsed/);
+    await expect(page.locator('[data-column-id="ideas"] .card')).toHaveCount(4);
+});
+
+test("phone: rails are hidden, the first lane fits, tabs reach collapsed columns", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/?sample");
+    await expect(page.locator(".col.is-collapsed").first()).toBeHidden();
+    await expect(page.locator('.board [data-column-id="next"]')).toBeInViewport({ ratio: 1 });
+
+    const tabs = page.getByRole("navigation", { name: "Jump to column" });
+    await tabs.getByRole("button", { name: /Backlog/ }).click();
+    await expect(page.locator('[data-column-id="backlog"]')).not.toHaveClass(/is-collapsed/);
+    await expect(page.locator('[data-column-id="backlog"]')).toBeInViewport({ ratio: 0.9 });
+});
+
+test("phone: label chips fold behind a Labels toggle", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const toggle = page.getByRole("button", { name: "Labels" });
+    const chip = page.locator(".filter-bar .label-toggle", { hasText: "Security" });
+    await expect(chip).toBeHidden();
+    await toggle.click();
+    await chip.click();
+    await expect(page.locator(".card")).toHaveCount(2);
+    await toggle.click();                       // folding them keeps the filter on
+    await expect(chip).toBeHidden();
+    await expect(page.getByRole("button", { name: /Labels/ })).toContainText("1");
+    await expect(page.locator(".card")).toHaveCount(2);
 });

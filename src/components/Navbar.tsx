@@ -16,13 +16,7 @@ export default function Navbar() {
             <div className="nav-left">
                 <div className="nav-brand">
                     <div className="nav-brand-icon">⊞</div>
-                    Kabana De´ Bkness
-                </div>
-                <div className="nav-divider"></div>
-                <div className="nav-breadcrumb">
-                    <span>Product</span>
-                    <span className="nav-sep">/</span>
-                    <span className="active">Launch board</span>
+                    Kanban
                 </div>
             </div>
             <div className="nav-right">

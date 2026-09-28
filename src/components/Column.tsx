@@ -16,6 +16,7 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
     const addCard = useKanbanStore((state) => state.addCard);
     const renameColumn = useKanbanStore((state) => state.renameColumn);
     const deleteColumn = useKanbanStore((state) => state.deleteColumn);
+    const setCollapsed = useKanbanStore((state) => state.setColumnCollapsed);
     const openCard = useUiStore((state) => state.openCard);
     const query = useUiStore((state) => state.query);
     const labelFilter = useUiStore((state) => state.labelFilter);
@@ -61,10 +62,47 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
         if (window.confirm(`Delete "${column.title}"${extra}?`)) deleteColumn(columnId);
     };
 
+    const count = filtering ? `${visibleCards.length}/${cards.length}` : String(cards.length);
+    // the last ("done") column is always green, like the mockup
+    const accent = <div className={`col-accent accent-${isDoneColumn ? "emerald" : ACCENTS[index % 3]}`} />;
+
+    // Collapsed: a thin rail. Click to expand, drag to reorder, and it's
+    // still a drop target — dropping a card on it appends to the column.
+    if (column.collapsed) {
+        return (
+            // sortable attributes go on the rail button, not the wrapper, so
+            // there's no button-inside-a-button for screen readers
+            <div ref={setNodeRef} className="col is-collapsed" style={style} data-column-id={columnId}>
+                {accent}
+                <button
+                    className="col-rail"
+                    {...attributes}
+                    {...listeners}
+                    onClick={() => setCollapsed(columnId, false)}
+                    // dnd-kit's keyboard sensor starts a drag on Enter or Space.
+                    // On a rail, Enter expands (like the click); Space still picks it up.
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            setCollapsed(columnId, false);
+                            return;
+                        }
+                        listeners?.onKeyDown?.(e);
+                    }}
+                    aria-label={`Expand ${column.title} (${count} cards)`}
+                    aria-expanded={false}
+                    title={`Expand ${column.title}`}
+                >
+                    <span className="col-rail-count">{count}</span>
+                    <span className="col-rail-title">{column.title}</span>
+                </button>
+            </div>
+        );
+    }
+
     return (
-        <div ref={setNodeRef} className="col" style={style} {...attributes}>
-            {/* the last ("done") column is always green, like the mockup */}
-            <div className={`col-accent accent-${isDoneColumn ? "emerald" : ACCENTS[index % 3]}`} />
+        <div ref={setNodeRef} className="col" style={style} {...attributes} data-column-id={columnId}>
+            {accent}
             <div className="col-header">
                 <div className="col-drag" {...listeners} aria-label={`Move column ${column.title}`}>⠿</div>
                 {renaming ? (
@@ -85,7 +123,18 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
                         {column.title}
                     </button>
                 )}
-                <div className="col-count">{filtering ? `${visibleCards.length}/${cards.length}` : cards.length}</div>
+                <div className="col-count">{count}</div>
+                <button
+                    className="col-collapse"
+                    onClick={() => setCollapsed(columnId, true)}
+                    aria-label={`Collapse ${column.title}`}
+                    aria-expanded={true}
+                    title="Collapse column"
+                >
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M6 4 2 8l4 4M10 4l4 4-4 4" />
+                    </svg>
+                </button>
                 <div className="col-menu-wrap" ref={menuRef}>
                     <button
                         className="col-menu"
@@ -98,6 +147,7 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
                     {menuOpen && (
                         <div className="col-popover" role="menu">
                             <button role="menuitem" onClick={startRename}>Rename</button>
+                            <button role="menuitem" onClick={() => { setMenuOpen(false); setCollapsed(columnId, true); }}>Collapse</button>
                             <button role="menuitem" className="danger" onClick={remove}>Delete column</button>
                         </div>
                     )}

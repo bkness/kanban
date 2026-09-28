@@ -42,7 +42,7 @@ export default function KanbanCard({ cardId, columnId, isDoneColumn }: { cardId:
             {card.dueDate && (
                 <div className="card-footer">
                     <div className={`card-due${status ? ` ${status}` : ""}`}>
-                        {status === "done" ? "✓" : "📅"} {formatDue(card.dueDate)}
+                        {status === "done" ? "✓ " : status === "overdue" ? "! due " : "due "}{formatDue(card.dueDate).toLowerCase()}
                     </div>
                 </div>
             )}

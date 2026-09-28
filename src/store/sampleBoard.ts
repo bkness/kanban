@@ -16,14 +16,16 @@ const labels: Record<string, Label> = {
 };
 
 const columnList: Column[] = [
-    { id: 'ideas',    title: 'Ideas' },
-    { id: 'backlog',  title: 'Backlog' },
+    // not-yet and already-done work start collapsed, so the active lanes
+    // (Up next → QA) fit a 1440px screen without scrolling
+    { id: 'ideas',    title: 'Ideas',   collapsed: true },
+    { id: 'backlog',  title: 'Backlog', collapsed: true },
     { id: 'next',     title: 'Up next' },
     { id: 'progress', title: 'In progress' },
     { id: 'review',   title: 'Code review' },
     { id: 'blocked',  title: 'Blocked' },
     { id: 'qa',       title: 'QA / staging' },
-    { id: 'shipped',  title: 'Shipped' },
+    { id: 'shipped',  title: 'Shipped', collapsed: true },
 ];
 
 const seeds: Record<string, Seed[]> = {

@@ -18,6 +18,10 @@ export type Card = {
 export type Column = {
     id:          string,
     title:       string,
+    // Shown as a thin rail; cards stay put. Deliberately board data, not a
+    // per-device view setting: it syncs, so a collapsed lane stays collapsed
+    // on every device (phones show it in the column tabs instead of a rail).
+    collapsed?:  boolean,
 }
 
 export type KanbanState = {
@@ -33,6 +37,7 @@ export type KanbanState = {
     deleteColumn:  (columnId: string) => void;
     renameColumn:  (columnId: string, title: string) => void;
     moveColumn:    (activeId: string, overId: string) => void;
+    setColumnCollapsed: (columnId: string, collapsed: boolean) => void;
    
     // card actions
     addCard:       (columnId: string, title: string) => string;

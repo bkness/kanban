@@ -40,7 +40,10 @@ export default function CardEditor() {
 function EditorForm({ cardId, onClose, closeRef }: { cardId: string; onClose: () => void; closeRef: RefObject<() => void> }) {
     const card = useKanbanStore((s) => s.cards[cardId]);
     const labels = useKanbanStore((s) => s.labels);
-    const columnTitle = useKanbanStore((s) => s.columns[card.columnId]?.title ?? "");
+    const columns = useKanbanStore((s) => s.columns);
+    const columnOrder = useKanbanStore((s) => s.columnOrder);
+    const moveCard = useKanbanStore((s) => s.moveCard);
+    const cardOrder = useKanbanStore((s) => s.cardOrder);
     const updateCard = useKanbanStore((s) => s.updateCard);
     const deleteCard = useKanbanStore((s) => s.deleteCard);
     const addLabel = useKanbanStore((s) => s.addLabel);
@@ -78,7 +81,20 @@ function EditorForm({ cardId, onClose, closeRef }: { cardId: string; onClose: ()
     return (
         <>
             <div className="editor-body">
-                <div className="editor-meta">{columnTitle}</div>
+                {/* Move between columns without dragging (handy on phones) */}
+                <select
+                    className="editor-column"
+                    aria-label="Column"
+                    value={card.columnId}
+                    onChange={(e) => {
+                        const to = e.target.value;
+                        moveCard(cardId, to, cardOrder[to]?.length ?? 0);
+                    }}
+                >
+                    {columnOrder.map((id) => (
+                        <option key={id} value={id}>{columns[id]?.title}</option>
+                    ))}
+                </select>
                 <label className="editor-field">
                     <span className="sr-only">Title</span>
                     <input
