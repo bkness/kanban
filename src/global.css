@@ -855,3 +855,41 @@ kbd {
   .account-email { display: none; }     /* the sync dot alone on phones */
   .account-btn { padding: 0 10px; }
 }
+
+/* ── New label ──────────────────────────────────────── */
+.label-new {
+  justify-self: start;
+  margin-top: 8px;
+  padding: 3px 9px;
+  border: 1px dashed var(--border-2);
+  border-radius: 20px;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.label-new:hover { color: var(--text); border-color: var(--text-dim); }
+.label-new:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.label-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.label-form-input { flex: 1 1 140px; min-width: 0; }
+.label-swatches { display: flex; gap: 6px; }
+.label-swatch {
+  width: 20px; height: 20px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.label-swatch.is-on { border-color: var(--text); }
+.label-swatch:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.swatch-blue    { background: var(--blue); }
+.swatch-violet  { background: var(--violet); }
+.swatch-emerald { background: var(--emerald); }
+.swatch-amber   { background: var(--amber); }
+.swatch-rose    { background: var(--rose); }
+
+@media (max-width: 720px) {
+  .btn-text { display: none; }            /* ↺ and + only on phones */
+  .nav-right button { min-width: 32px; justify-content: center; }
+}

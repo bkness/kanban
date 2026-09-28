@@ -95,6 +95,7 @@ export const useKanbanStore = create<KanbanState>()(
                 set((state) => ({
                     labels: { ...state.labels, [id]: { id, ...label } },
                 }));
+                return id;
             },
             deleteLabel: (labelId) => {
                 set((state) => {

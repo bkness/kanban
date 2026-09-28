@@ -44,6 +44,6 @@ export type KanbanState = {
     resetBoard:    () => void;
 
     // label actions
-    addLabel:      (label: Omit<Label, "id">) => void;
+    addLabel:      (label: Omit<Label, "id">) => string;
     deleteLabel:   (labelId: string) => void;
 }

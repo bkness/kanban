@@ -43,6 +43,7 @@ function EditorForm({ cardId, onClose, closeRef }: { cardId: string; onClose: ()
     const columnTitle = useKanbanStore((s) => s.columns[card.columnId]?.title ?? "");
     const updateCard = useKanbanStore((s) => s.updateCard);
     const deleteCard = useKanbanStore((s) => s.deleteCard);
+    const addLabel = useKanbanStore((s) => s.addLabel);
     const [title, setTitle] = useState(card.title);
 
     const commitTitle = () => {
@@ -120,6 +121,11 @@ function EditorForm({ cardId, onClose, closeRef }: { cardId: string; onClose: ()
                             );
                         })}
                     </div>
+                    <NewLabel
+                        onCreate={(text, color) =>
+                            updateCard(cardId, { labelIds: [...card.labelIds, addLabel({ text, color })] })
+                        }
+                    />
                 </fieldset>
 
                 <label className="editor-field">
@@ -129,7 +135,14 @@ function EditorForm({ cardId, onClose, closeRef }: { cardId: string; onClose: ()
                             type="date"
                             className="editor-input"
                             value={card.dueDate ?? ""}
-                            onChange={(e) => updateCard(cardId, { dueDate: e.target.value || null })}
+                            // max keeps the year field to 4 digits; the check also drops
+                            // anything else the browser lets through (e.g. year 10000)
+                            max="9999-12-31"
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                if (!v) updateCard(cardId, { dueDate: null });
+                                else if (/^\d{4}-\d{2}-\d{2}$/.test(v)) updateCard(cardId, { dueDate: v });
+                            }}
                         />
                         {card.dueDate && (
                             <button type="button" className="btn-ghost" onClick={() => updateCard(cardId, { dueDate: null })}>
@@ -145,5 +158,62 @@ function EditorForm({ cardId, onClose, closeRef }: { cardId: string; onClose: ()
                 <button type="button" className="btn-primary" onClick={close}>Done</button>
             </div>
         </>
+    );
+}
+
+const LABEL_COLORS = ["blue", "violet", "emerald", "amber", "rose"] as const;
+
+// "+ New label": name it, pick a color, and it's created and added to this card
+function NewLabel({ onCreate }: { onCreate: (text: string, color: string) => void }) {
+    const [open, setOpen] = useState(false);
+    const [text, setText] = useState("");
+    const [color, setColor] = useState<string>(LABEL_COLORS[0]);
+
+    const create = () => {
+        const trimmed = text.trim();
+        if (!trimmed) return;
+        onCreate(trimmed.slice(0, 24), color);
+        setText("");
+        setOpen(false);
+    };
+
+    if (!open) {
+        return (
+            <button type="button" className="label-new" onClick={() => setOpen(true)}>
+                ＋ New label
+            </button>
+        );
+    }
+
+    return (
+        <div className="label-form">
+            <input
+                className="editor-input label-form-input"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") { e.preventDefault(); create(); }
+                    if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }
+                }}
+                placeholder="Label name"
+                aria-label="New label name"
+                maxLength={24}
+                autoFocus
+            />
+            <div className="label-swatches" role="radiogroup" aria-label="Label color">
+                {LABEL_COLORS.map((c) => (
+                    <button
+                        key={c}
+                        type="button"
+                        role="radio"
+                        aria-checked={color === c}
+                        aria-label={c}
+                        className={`label-swatch swatch-${c}${color === c ? " is-on" : ""}`}
+                        onClick={() => setColor(c)}
+                    />
+                ))}
+            </div>
+            <button type="button" className="btn-primary" onClick={create} disabled={!text.trim()}>Add</button>
+        </div>
     );
 }
