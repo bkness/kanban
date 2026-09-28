@@ -893,3 +893,17 @@ kbd {
   .btn-text { display: none; }            /* ↺ and + only on phones */
   .nav-right button { min-width: 32px; justify-content: center; }
 }
+
+/* ── ?sample banner ─────────────────────────────────── */
+.sample-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: center;
+  padding: 7px 16px;
+  background: var(--amber-dim);
+  border-bottom: 1px solid var(--border);
+  color: var(--amber);
+  font-size: 12px;
+}
+.sample-banner a { color: var(--text); }

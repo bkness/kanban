@@ -5,6 +5,7 @@ import ShortcutsHelp from "./components/ShortcutsHelp";
 import AuthDialog from "./components/AuthDialog";
 import SyncNotice from "./components/SyncNotice";
 import { useAuthStore } from "./sync/authStore";
+import { isSampleMode } from "./sync/storage";
 import { useShortcuts } from "./hooks/useShortcuts";
 
 // Must not render <body>: the page already has one, and React 19 treats
@@ -14,10 +15,17 @@ import { useShortcuts } from "./hooks/useShortcuts";
 export default function App() {
   useShortcuts();
   // Restore a signed-in session (or settle into guest mode) once on load
-  useEffect(() => { void useAuthStore.getState().init(); }, []);
+  // (skipped on the ?sample board, which never syncs)
+  useEffect(() => { if (!isSampleMode()) void useAuthStore.getState().init(); }, []);
   return (
     <div className="app">
       <Navbar />
+      {isSampleMode() && (
+        <div className="sample-banner" role="note">
+          Sample board — edits here stay separate from your own board.
+          <a href="/">Back to my board</a>
+        </div>
+      )}
       <KanbanBoard />
       <ShortcutsHelp />
       <AuthDialog />
