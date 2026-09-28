@@ -690,3 +690,61 @@ button.col-title:focus-visible,
 @media (prefers-reduced-motion: reduce) {
   .card, .col { transition: none !important; }
 }
+
+/* ── Search + label filter ───────────────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.filter-search {
+  width: 200px;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.filter-search::placeholder { color: var(--text-dim); }
+.filter-search:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+.filter-labels { display: flex; flex-wrap: wrap; gap: 5px; }
+.filter-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.filter-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--blue);
+  font: inherit;
+  cursor: pointer;
+}
+.filter-clear:hover { text-decoration: underline; }
+.filter-clear:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.col-empty {
+  padding: 18px 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 720px) {
+  .toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+  .filter-bar { justify-content: flex-start; }
+  .filter-search { flex: 1 1 100%; width: auto; font-size: 16px; } /* 16px: no iOS focus zoom */
+  /* the navbar wrapped every word on phones */
+  .nav-divider, .nav-breadcrumb { display: none; }
+  .nav { padding: 0 12px; gap: 8px; }
+  .nav-brand { font-size: 14px; gap: 6px; }
+  .nav-right { gap: 6px; }
+  .nav-brand, .nav-right button { white-space: nowrap; }
+  .nav-right button { padding: 0 10px; font-size: 12px; }
+}
