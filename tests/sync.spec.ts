@@ -16,7 +16,8 @@ const cloudBoard = (title = "From the cloud") => ({
 const json = (route: Route, body: unknown, status = 200) =>
     route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 
-type Mock = { signedIn: boolean; board: { data: unknown; version: number }; puts: { data: any; version: number }[]; putReply?: (body: any) => [unknown, number] };
+type PutBody = { data: { cards: Record<string, { title: string }> }; version: number };
+type Mock = { signedIn: boolean; board: { data: unknown; version: number }; puts: PutBody[]; putReply?: (body: PutBody) => [unknown, number] };
 
 async function mockApi(page: Page, init: Partial<Mock> = {}) {
     const m: Mock = { signedIn: false, board: { data: null, version: 0 }, puts: [], ...init };
