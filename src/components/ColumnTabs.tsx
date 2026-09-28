@@ -9,6 +9,7 @@ export default function ColumnTabs() {
     const columnOrder = useKanbanStore((s) => s.columnOrder);
     const columns = useKanbanStore((s) => s.columns);
     const cardOrder = useKanbanStore((s) => s.cardOrder);
+    const setCollapsed = useKanbanStore((s) => s.setColumnCollapsed);
     const [overflowing, setOverflowing] = useState(false);
     const [visible, setVisible] = useState<Set<string>>(new Set());
 
@@ -50,12 +51,18 @@ export default function ColumnTabs() {
             {columnOrder.map((id) => {
                 const title = columns[id]?.title ?? "";
                 const count = cardOrder[id]?.length ?? 0;
+                const collapsed = !!columns[id]?.collapsed;
+                // A collapsed column expands first, then scrolls once it has its full width
+                const jump = () => {
+                    if (collapsed) setCollapsed(id, false);
+                    requestAnimationFrame(() => document.querySelector(colSelector(id))
+                        ?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" }));
+                };
                 return (
                     <button
                         key={id}
-                        className={`col-tab${visible.has(id) ? " is-visible" : ""}`}
-                        onClick={() => document.querySelector(colSelector(id))
-                            ?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" })}
+                        className={`col-tab${visible.has(id) && !collapsed ? " is-visible" : ""}${collapsed ? " is-collapsed" : ""}`}
+                        onClick={jump}
                     >
                         {title}
                         <span className="col-tab-count">{count}</span>

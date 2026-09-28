@@ -70,11 +70,11 @@ export default function KanbanBoard() {
                 <div className="board-info">
                     <div className="board-eyebrow">Portfolio</div>
                     <div className="board-title">Launch board</div>
-                    <div className="board-stats">
-                        <div className="board-stat">🗂 <strong>{stats.total}</strong> cards</div>
-                        <div className="board-stat">⏱ <strong>{stats.overdue}</strong> overdue</div>
-                        <div className="board-stat">✓ <strong>{stats.done}</strong> done</div>
-                    </div>
+                    <p className="board-stats">
+                        <span><strong>{stats.total}</strong> cards</span>
+                        <span className={stats.overdue ? "is-warn" : undefined}><strong>{stats.overdue}</strong> overdue</span>
+                        <span><strong>{stats.done}</strong> done</span>
+                    </p>
                 </div>
                 <FilterBar />
             </div>

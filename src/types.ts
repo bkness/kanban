@@ -18,6 +18,7 @@ export type Card = {
 export type Column = {
     id:          string,
     title:       string,
+    collapsed?:  boolean,       // shown as a thin rail; cards stay put
 }
 
 export type KanbanState = {
@@ -33,6 +34,7 @@ export type KanbanState = {
     deleteColumn:  (columnId: string) => void;
     renameColumn:  (columnId: string, title: string) => void;
     moveColumn:    (activeId: string, overId: string) => void;
+    setColumnCollapsed: (columnId: string, collapsed: boolean) => void;
    
     // card actions
     addCard:       (columnId: string, title: string) => string;

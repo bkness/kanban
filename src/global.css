@@ -986,3 +986,221 @@ kbd {
   }
   .col-tabs { padding: 10px 16px 0; }
 }
+
+/* ══════════════════════════════════════════════════════
+   CLEANUP PASS — fewer boxes, one loud thing per card
+   (overrides earlier rules; fold them in when happy)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Stats: inline mono text instead of three chips ── */
+.board-stats {
+  display: flex;
+  gap: 0;
+  margin-top: 6px;
+  font: 500 12px/1 'DM Mono', monospace;
+  color: var(--text-dim);
+}
+.board-stats > span + span::before { content: "·"; margin: 0 10px; color: var(--border-2); }
+.board-stats strong { color: var(--text-muted); font-weight: 500; }
+.board-stats .is-warn,
+.board-stats .is-warn strong { color: var(--rose); }
+
+/* ── Filter chips: outlined when off, glowing when on ── */
+.filter-bar .label-toggle {
+  opacity: 1;
+  background: transparent;
+  border: 1px solid color-mix(in oklab, currentColor 35%, transparent);
+  border-radius: 99px;
+  padding: 3px 10px;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.filter-bar .label-toggle:hover { border-color: color-mix(in oklab, currentColor 70%, transparent); }
+.filter-bar .label-toggle.is-on {
+  background: color-mix(in oklab, currentColor 16%, transparent);
+  border-color: currentColor;
+  box-shadow: 0 0 12px color-mix(in oklab, currentColor 35%, transparent);
+}
+
+/* ── Columns: lanes, not boxes. Rail + spacing define them ── */
+.col {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+}
+.col-accent { height: 2px; border-radius: 2px; opacity: 0.85; }
+.col-header { border-bottom: none; padding: 12px 4px 8px; }
+.col-body { padding: 4px 2px 8px; gap: 8px; }
+.col-footer { border-top: none; padding: 0 2px 8px; }
+.col-count {
+  background: none;
+  border: none;
+  padding: 0;
+  min-width: 0;
+  font: 500 11px 'DM Mono', monospace;
+}
+
+/* drag handle + menu only on hover/focus */
+.col-drag, .col-menu { opacity: 0; transition: opacity 0.15s, background 0.1s, color 0.1s; }
+.col:hover .col-drag, .col:hover .col-menu,
+.col:focus-within .col-drag, .col:focus-within .col-menu,
+.col-menu[aria-expanded="true"] { opacity: 1; }
+@media (hover: none) { .col-drag, .col-menu { opacity: 1; } }  /* touch has no hover */
+
+/* thin, quiet column scrollbars */
+.col-body { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+/* ── Cards: the only real objects on the board ── */
+.card {
+  background: var(--surface);
+  border-color: transparent;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset, var(--shadow-sm);
+}
+.card:hover { background: var(--surface-2); border-color: var(--border-2); }
+
+/* ── Tags on cards: glowing dot + mono text, no fill ── */
+.card .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  font: 500 11px 'DM Mono', monospace;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  color: var(--text-muted);
+}
+.card .label::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--dot, var(--text-dim));
+  box-shadow: 0 0 6px var(--dot, transparent);
+}
+.card .label-blue    { --dot: var(--blue); }
+.card .label-violet  { --dot: var(--violet); }
+.card .label-emerald { --dot: var(--emerald); }
+.card .label-amber   { --dot: var(--amber); }
+.card .label-rose    { --dot: var(--rose); }
+.card-labels { gap: 12px; }
+
+/* ── Card footer: no divider, just small mono text ── */
+.card-footer { border-top: none; padding-top: 0; margin-top: 8px; }
+
+/* ── Column tabs: text + underline instead of pills ── */
+.col-tabs { gap: 2px; border-bottom: 1px solid var(--border); }
+.col-tab {
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 6px 10px 8px;
+}
+.col-tab:hover { border-color: var(--border-2); }
+.col-tab.is-visible { background: none; border-bottom-color: var(--blue); }
+.col-tab-count { background: none; padding: 0; min-width: 0; font-family: 'DM Mono', monospace; color: var(--text-dim); }
+
+/* ── Add card / add column: ghosted until hover ── */
+.add-card-btn { border-color: transparent; }
+.col:hover .add-card-btn { border-color: var(--border); }
+
+/* ══════════════════════════════════════════════════════
+   FLUID LANES + COLLAPSIBLE COLUMNS
+   Columns stretch to fill the screen and only scroll once
+   they'd drop below --col-min. Collapsed columns are rails.
+   ══════════════════════════════════════════════════════ */
+:root {
+  --col-min: 232px;   /* 5 lanes + 3 rails + add rail fit in 1440px */
+  --col-max: 380px;
+  --rail-w:  36px;
+}
+
+.board { gap: 10px; }
+.board > .col {
+  width: auto;
+  min-width: var(--col-min);
+  max-width: var(--col-max);
+  flex: 1 0 var(--col-min);
+}
+
+/* ── Collapsed rail ── */
+.board > .col.is-collapsed {
+  flex: 0 0 var(--rail-w);
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  max-width: var(--rail-w);
+  align-self: stretch;          /* full-height strip = big click + drop target */
+}
+.col-rail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 12px 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--surface) 55%, transparent);
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.col-rail:hover { background: var(--surface); color: var(--text); }
+.col-rail:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.col-rail-title {
+  writing-mode: vertical-rl;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+.col-rail-count { font: 500 11px 'DM Mono', monospace; color: var(--text-dim); }
+
+/* ── Collapse button: hover-only, like the menu ── */
+.col-collapse {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.1s, color 0.1s;
+}
+.col-collapse:hover { background: var(--surface-2); color: var(--text-muted); }
+.col-collapse:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; opacity: 1; }
+.col:hover .col-collapse, .col:focus-within .col-collapse { opacity: 1; }
+@media (hover: none) { .col-collapse { opacity: 1; } }
+
+/* ── Add column: a rail too, so it doesn't eat a lane's worth of width ── */
+.add-col {
+  width: var(--rail-w);
+  min-width: var(--rail-w);
+  height: auto;
+  align-self: stretch;
+  margin-top: 10px;
+  writing-mode: vertical-rl;
+  padding: 12px 0;
+  justify-content: flex-start;
+  border-color: var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Tabs: collapsed columns read dimmer ── */
+.col-tab.is-collapsed { color: var(--text-dim); font-style: italic; }
+
+/* ── Phones: keep one lane per swipe (overrides the fluid rule above) ── */
+@media (max-width: 720px) {
+  .board > .col {
+    flex: none;
+    width: calc(100vw - 56px);
+    min-width: calc(100vw - 56px);
+    max-width: none;
+  }
+  .board > .col.is-collapsed {
+    flex: none;
+    width: 44px; min-width: 44px; max-width: 44px;   /* a bit wider for thumbs */
+  }
+}

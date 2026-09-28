@@ -52,6 +52,12 @@ export const useKanbanStore = create<KanbanState>()(
                 });
             },
 
+            setColumnCollapsed: (columnId, collapsed) => {
+                set((state) => ({
+                    columns: { ...state.columns, [columnId]: { ...state.columns[columnId], collapsed } },
+                }));
+            },
+
             // card actions
             addCard: (columnId, title) => {
                 const id = crypto.randomUUID();

@@ -249,7 +249,7 @@ test("?sample opens the busy board without touching the guest board", async ({ p
     await page.goto("/?sample");
     await expect(page.locator(".sample-banner")).toBeVisible();
     await expect(page.locator(".col")).toHaveCount(8);
-    await expect(page.locator(".card")).toHaveCount(32);
+    await expect(page.locator(".board-stats")).toContainText("32 cards");
     await page.locator(".card").first().click();
     await page.locator(".editor-title").fill("Sample edit");
     await page.getByRole("button", { name: "Done" }).click();
@@ -272,12 +272,32 @@ test("column tabs appear only when columns overflow, and jump to a column", asyn
     await tabs.getByRole("button", { name: /Shipped/ }).click();
     await expect(shipped).toBeInViewport({ ratio: 0.9 });
     await expect(tabs.getByRole("button", { name: /Shipped/ })).toHaveClass(/is-visible/);
+    await expect(shipped.locator(".card")).toHaveCount(6);                 // it was collapsed; the tab expanded it
+});
+
+test("columns collapse to a rail and expand again, and it persists", async ({ page }) => {
+    await page.getByRole("button", { name: "Collapse Shipped", exact: true }).click();
+    const shipped = column(page, "Shipped");
+    await expect(page.locator('[data-column-id="done"]')).toHaveClass(/is-collapsed/);
+    await expect(page.locator('[data-column-id="done"] .card')).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Expand Shipped \(4 cards\)/ })).toBeVisible();
+    await page.reload();
+    await page.getByRole("button", { name: /Expand Shipped/ }).click();
+    await expect(shipped.locator(".card")).toHaveCount(4);
+});
+
+test("on a wide screen the sample board's active lanes fit without scrolling", async ({ page }) => {
+    await page.goto("/?sample");
+    for (const id of ["next", "progress", "review", "blocked", "qa"]) {
+        await expect(page.locator(`.board [data-column-id="${id}"]`)).toBeInViewport({ ratio: 1 });
+    }
 });
 
 test("tall columns scroll inside; the page itself never scrolls", async ({ page }) => {
     await page.setViewportSize({ width: 960, height: 700 });
     await page.goto("/?sample");
     await expect(page.locator(".card").first()).toBeVisible();
+    await page.getByRole("button", { name: /Expand Backlog/ }).click();
     expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(0);
     // Backlog is taller than the window, but its Add card button stays on screen
     await expect(page.locator('[data-column-id="backlog"] .add-card-btn')).toBeInViewport();
