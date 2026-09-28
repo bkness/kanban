@@ -310,3 +310,38 @@ test("move a card to another column from the editor", async ({ page }) => {
     await expect(column(page, "Shipped").locator(".card", { hasText: "Resume link refresh" })).toBeVisible();
     await expect(column(page, "In progress").locator(".card")).toHaveCount(1);
 });
+
+test("Enter on a collapsed rail expands it (it doesn't start a drag)", async ({ page }) => {
+    await page.goto("/?sample");
+    const rail = page.getByRole("button", { name: /Expand Ideas/ });
+    await rail.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.locator('[data-column-id="ideas"]')).not.toHaveClass(/is-collapsed/);
+    await expect(page.locator('[data-column-id="ideas"] .card')).toHaveCount(4);
+});
+
+test("phone: rails are hidden, the first lane fits, tabs reach collapsed columns", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/?sample");
+    await expect(page.locator(".col.is-collapsed").first()).toBeHidden();
+    await expect(page.locator('.board [data-column-id="next"]')).toBeInViewport({ ratio: 1 });
+
+    const tabs = page.getByRole("navigation", { name: "Jump to column" });
+    await tabs.getByRole("button", { name: /Backlog/ }).click();
+    await expect(page.locator('[data-column-id="backlog"]')).not.toHaveClass(/is-collapsed/);
+    await expect(page.locator('[data-column-id="backlog"]')).toBeInViewport({ ratio: 0.9 });
+});
+
+test("phone: label chips fold behind a Labels toggle", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const toggle = page.getByRole("button", { name: "Labels" });
+    const chip = page.locator(".filter-bar .label-toggle", { hasText: "Security" });
+    await expect(chip).toBeHidden();
+    await toggle.click();
+    await chip.click();
+    await expect(page.locator(".card")).toHaveCount(2);
+    await toggle.click();                       // folding them keeps the filter on
+    await expect(chip).toBeHidden();
+    await expect(page.getByRole("button", { name: /Labels/ })).toContainText("1");
+    await expect(page.locator(".card")).toHaveCount(2);
+});

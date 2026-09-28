@@ -79,6 +79,16 @@ export default function Column({ columnId, index, isDoneColumn }: { columnId: st
                     {...attributes}
                     {...listeners}
                     onClick={() => setCollapsed(columnId, false)}
+                    // dnd-kit's keyboard sensor starts a drag on Enter or Space.
+                    // On a rail, Enter expands (like the click); Space still picks it up.
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            setCollapsed(columnId, false);
+                            return;
+                        }
+                        listeners?.onKeyDown?.(e);
+                    }}
                     aria-label={`Expand ${column.title} (${count} cards)`}
                     aria-expanded={false}
                     title={`Expand ${column.title}`}

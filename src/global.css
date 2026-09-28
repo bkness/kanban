@@ -1204,3 +1204,46 @@ kbd {
     width: 44px; min-width: 44px; max-width: 44px;   /* a bit wider for thumbs */
   }
 }
+
+/* ── Phone: labels toggle (hidden on wider screens) ──── */
+.filter-toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.filter-toggle[aria-expanded="true"] { color: var(--text); border-color: var(--border-2); }
+.filter-toggle:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.filter-toggle-count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: var(--blue-dim);
+  color: var(--blue);
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  /* rails would push the first lane off-screen; the tabs open collapsed columns instead */
+  .board > .col.is-collapsed { display: none; }
+
+  /* compact header: the navbar already says "Kanban" */
+  .board-eyebrow { display: none; }
+  .board-title { font-size: 18px; }
+  .toolbar { gap: 10px; }
+
+  /* search and the Labels toggle share a row; chips fold away */
+  .filter-bar { flex-wrap: wrap; }
+  .filter-search-wrap { flex: 1 1 0; min-width: 0; }
+  .filter-toggle { display: flex; align-self: stretch; }
+  .filter-labels { display: none; flex-basis: 100%; }
+  .filter-labels.is-open { display: flex; }
+}

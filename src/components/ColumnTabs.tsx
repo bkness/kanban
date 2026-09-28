@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useKanbanStore } from "../store/kanbanStore";
 
+const PHONE = "(max-width: 720px)";
 const colSelector = (id: string) => `.board [data-column-id="${CSS.escape(id)}"]`;
 
 // A tab per column that scrolls the board to it. Tabs for columns currently
@@ -11,6 +12,16 @@ export default function ColumnTabs() {
     const cardOrder = useKanbanStore((s) => s.cardOrder);
     const setCollapsed = useKanbanStore((s) => s.setColumnCollapsed);
     const [overflowing, setOverflowing] = useState(false);
+    // Phones hide collapsed rails (CSS), so the tabs are the only way back to them
+    const [isPhone, setIsPhone] = useState(() => window.matchMedia(PHONE).matches);
+    const anyCollapsed = columnOrder.some((id) => columns[id]?.collapsed);
+
+    useEffect(() => {
+        const mq = window.matchMedia(PHONE);
+        const onChange = () => setIsPhone(mq.matches);
+        mq.addEventListener("change", onChange);
+        return () => mq.removeEventListener("change", onChange);
+    }, []);
     const [visible, setVisible] = useState<Set<string>>(new Set());
 
     // Show the tabs only while the board is wider than the window
@@ -44,7 +55,7 @@ export default function ColumnTabs() {
         return () => io.disconnect();
     }, [overflowing, columnOrder.length]);
 
-    if (!overflowing) return null;
+    if (!overflowing && !(isPhone && anyCollapsed)) return null;
 
     return (
         <nav className="col-tabs" aria-label="Jump to column">
