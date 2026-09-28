@@ -2,13 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { KanbanState } from '../types';
 import { starterBoard } from './starterBoard';
-import { initialStorageKey } from '../sync/storage';
+import { sampleBoard } from './sampleBoard';
+import { initialStorageKey, isSampleMode } from '../sync/storage';
+
+const defaultBoard = () => (isSampleMode() ? sampleBoard() : starterBoard());
 
 export const useKanbanStore = create<KanbanState>()(
     persist(
         (set) => ({
             // data — a starter board until the visitor's own board is saved
-            ...starterBoard(),
+            ...defaultBoard(),
 
             // column actions
             addColumn: (title) => {
@@ -113,7 +116,7 @@ export const useKanbanStore = create<KanbanState>()(
             },
 
             // board actions
-            resetBoard: () => set(starterBoard()),
+            resetBoard: () => set(defaultBoard()),
         }),
         {
             // guest key, or the signed-in user's cache (see sync/storage.ts)

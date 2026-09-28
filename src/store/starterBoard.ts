@@ -17,7 +17,7 @@ const columnList: Column[] = [
     { id: 'done',  title: 'Shipped' },
 ];
 
-type Seed = { title: string; description: string; labelIds: string[]; dueInDays?: number };
+export type Seed = { title: string; description: string; labelIds: string[]; dueInDays?: number };
 
 const seeds: Record<string, Seed[]> = {
     todo: [
@@ -44,6 +44,12 @@ function isoDaysFromNow(days: number) {
 }
 
 export function starterBoard() {
+    return buildBoard(labels, columnList, seeds);
+}
+
+// Turns seed lists into the store's normalized shape. Ids are stable
+// ("<column>-<index>") so tests and resets are deterministic.
+export function buildBoard(labels: Record<string, Label>, columnList: Column[], seeds: Record<string, Seed[]>) {
     const now = new Date().toISOString();
     const columns: Record<string, Column> = {};
     const cards: Record<string, Card> = {};
@@ -51,7 +57,7 @@ export function starterBoard() {
 
     for (const column of columnList) {
         columns[column.id] = column;
-        cardOrder[column.id] = seeds[column.id].map((seed, i) => {
+        cardOrder[column.id] = (seeds[column.id] ?? []).map((seed, i) => {
             const id = `${column.id}-${i}`;
             cards[id] = {
                 id,

@@ -239,3 +239,23 @@ test("navbar fits on a phone", async ({ page }) => {
         expect(box!.x + box!.width, `${name} right edge`).toBeLessThanOrEqual(375);
     }
 });
+
+test("?sample opens the busy board without touching the guest board", async ({ page }) => {
+    // edit the guest board first
+    await page.locator(".card", { hasText: "Resume link refresh" }).click();
+    await page.locator(".editor-title").fill("Guest edit");
+    await page.getByRole("button", { name: "Done" }).click();
+
+    await page.goto("/?sample");
+    await expect(page.locator(".sample-banner")).toBeVisible();
+    await expect(page.locator(".col")).toHaveCount(8);
+    await expect(page.locator(".card")).toHaveCount(32);
+    await page.locator(".card").first().click();
+    await page.locator(".editor-title").fill("Sample edit");
+    await page.getByRole("button", { name: "Done" }).click();
+
+    await page.getByRole("link", { name: "Back to my board" }).click();
+    await expect(page.locator(".sample-banner")).toHaveCount(0);
+    await expect(page.locator(".card", { hasText: "Guest edit" })).toBeVisible();
+    await expect(page.locator(".card", { hasText: "Sample edit" })).toHaveCount(0);
+});
