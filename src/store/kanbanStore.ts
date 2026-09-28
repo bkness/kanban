@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { KanbanState } from '../types';
 import { starterBoard } from './starterBoard';
+import { initialStorageKey } from '../sync/storage';
 
 export const useKanbanStore = create<KanbanState>()(
     persist(
@@ -114,7 +115,8 @@ export const useKanbanStore = create<KanbanState>()(
             resetBoard: () => set(starterBoard()),
         }),
         {
-            name: 'kanban-storage',
+            // guest key, or the signed-in user's cache (see sync/storage.ts)
+            name: initialStorageKey(),
         }
     )
 );  

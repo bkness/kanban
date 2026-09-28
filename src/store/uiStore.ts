@@ -16,6 +16,9 @@ type UiState = {
 
     helpOpen: boolean;
     setHelpOpen: (open: boolean) => void;
+
+    authOpen: boolean;
+    setAuthOpen: (open: boolean) => void;
 };
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -35,4 +38,7 @@ export const useUiStore = create<UiState>()((set) => ({
 
     helpOpen: false,
     setHelpOpen: (helpOpen) => set({ helpOpen }),
+
+    authOpen: false,
+    setAuthOpen: (authOpen) => set({ authOpen }),
 }));
